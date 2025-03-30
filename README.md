@@ -2,7 +2,7 @@
 <h4 align="center">An enhanced file explorer showing relevant only relevant files when required.</h4>
 
 <p align="center">
-  <img  src="https://github.com/amatya-aditya/obsidian-zen-space/blob/master/assets/light-mode.png">
+  <img  src="https://github.com/amatya-aditya/obsidian-zen-space/blob/master/assets/zen-space.gif">
 </p>
 
 
@@ -30,24 +30,25 @@
 
 
 <p align="center">
-  <a href="https://www.youtube.com/watch?v=Ie73HjSW85Y" target="_blank">
+  <a href="https://youtu.be/G4XB5RM_ZZY" target="_blank">
     <img src="https://upload.wikimedia.org/wikipedia/commons/b/b8/YouTube_play_button_icon_%282013%E2%80%932017%29.svg" 
          style="width: 50px; height: auto; ">
   </a>
 </p>
 
 
-<p align="center">
-  <img  src="https://github.com/amatya-aditya/obsidian-zen-space/blob/master/assets/zen-space.gif">
-</p>
-
 ## Features
 
 📁 Distraction-Free Folder View - Focus on your content with a dedicated, clean interface for browsing files.
-🗂️ Auto-Index Generation - Automatically create and update Index files from folder creating map of content.
+
+🗂️ Auto-Index Generation - Automatically create and update Index files from folder creating map of content
+
 🖼️ Visual Grid Layout - Display files in an elegant, card-based grid layout for enhanced visual organization.
+
 ⚡ Quick Action Buttons - Access common operations (rename, delete, pin) through intuitive hover buttons.
+
 📌 Pin Important Items - Pin frequently used files and folders for quick access.
+
 🧭 Seamless Navigation - Effortlessly navigate nested folders using breadcrumb trails without disrupting your workflow
 
 
