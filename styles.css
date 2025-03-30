@@ -1,8 +1,426 @@
-/*
+.workspace-leaf-content[data-type="zen-space-view"] .view-content {
+	padding: 0px !important;
+}
 
-This CSS file will be included with your plugin, and
-available in the app when your plugin is enabled.
+/* Modal styles */
+.zen-space-modal-input-container {
+    margin-bottom: 15px;
+}
 
-If your plugin does not need CSS, delete this file.
+.zen-space-modal-input {
+    width: 100%;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid var(--background-modifier-border);
+}
 
-*/
+.zen-space-modal-button-container {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+/* Folder button styles */
+.nav-folder-title {
+    position: relative;
+}
+
+.zen-space-button {
+    opacity: 0.7;
+    cursor: pointer;
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    z-index: 1;
+    transition: color 0.2s ease-in-out, opacity 0.2s ease-in-out;
+}
+
+.zen-space-button:hover {
+    opacity: 1;
+    color: var(--interactive-accent);
+}
+
+.nav-folder.has-index-file .zen-space-button,
+.nav-folder.zen-space-active .zen-space-button,
+.active-zen-space {
+    color: var(--interactive-accent) !important;
+    opacity: 0.9;
+}
+
+/* Ensure folder title content doesn't overflow into the button */
+.nav-folder-title-content {
+    padding-right: 30px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Styles for the custom Zen Space view */
+.zen-space-nav-bar {
+    padding: 8px 16px;
+    border-bottom: 1px solid var(--background-modifier-border);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.zen-space-title-container {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.zen-space-nav-bar h3 {
+    margin: 0;
+    font-size: 16px;
+    color: var(--text-normal);
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.zen-space-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.zen-space-name-container {
+	height: fit-content !important;
+    max-width: 100%; 
+    overflow: hidden;
+	text-align: center;
+    display: flex
+;
+}
+
+/* Common styles for the action buttons */
+.zen-space-new-file-button,
+.zen-space-new-folder-button,
+.zen-space-new-canvas-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: transparent !important;
+	box-shadow: 0px 0px 0px 0px transparent !important;
+    color: var(--text-muted) !important;
+	border: none;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.zen-space-new-file-button:hover,
+.zen-space-new-folder-button:hover,
+.zen-space-new-canvas-button:hover {
+    background-color: var(--background-modifier-hover);
+    color: var(--text-normal);
+}
+
+.zen-space-sort-selector {
+    display: flex;
+    align-items: center;
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.zen-space-sort-label {
+    margin-right: 4px;
+}
+
+.zen-space-sort-select {
+    color: var(--text-normal);
+    border-radius: 4px;
+    padding: 4px 6px;
+    font-size: 12px;
+	text-align: center;
+}
+
+.zen-space-sort-order {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: transparent !important;
+	box-shadow: 0px 0px 0px 0px transparent !important;
+    color: var(--text-muted) !important;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: color 0.2s ease;
+}
+
+.zen-space-sort-order:hover {
+    color: var(--text-normal);
+}
+
+.zen-space-file-list {
+    padding: 0 10px;
+	padding-bottom: 35px;
+}
+
+.zen-space-file-item {
+	margin-bottom: var(--size-2-1);
+    display: flex;
+    border-radius: var(--radius-s);
+    cursor: var(--cursor);
+    color: var(--nav-item-color);
+    font-size: var(--nav-item-size);
+    font-weight: var(--nav-item-weight);
+    line-height: var(--line-height-tight);
+	align-items: center;
+	height: 24.5px;
+	padding: var(--nav-item-parent-padding);
+    position: relative; /* For proper positioning of action buttons */
+}
+
+/* Add styling for pinned items */
+.zen-space-pinned-item {
+    background-color: var(--background-secondary-alt);
+    border-left: 2px solid var(--interactive-accent);
+}
+
+.zen-space-file-item:hover {
+    background-color: var(--background-modifier-hover);
+}
+
+.zen-space-item-icon {
+    display: flex;
+    align-items: center;
+    margin-right: 6px;
+    color: var(--text-muted);
+}
+
+.zen-space-folder-item {
+    font-weight: 500;
+}
+
+/* Style for folder toggle icon */
+.zen-space-folder-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    margin-right: 1px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+	position: relative;
+	right: 5px;
+}
+
+.zen-space-folder-toggle:hover {
+    color: var(--text-normal);
+}
+
+.zen-space-item-name {
+	display: inline-block;
+    overflow-wrap: anywhere;
+    overflow: hidden;
+    white-space: nowrap; /* Force single line */
+	text-overflow: ellipsis; /* Add ellipsis for long names */
+    max-width: 100%; /* Stay within container */
+}
+
+.zen-space-file-name {
+    margin: 0px;
+}
+
+.zen-space-empty-message {
+    padding: 10px;
+    color: var(--text-muted);
+    font-style: italic;
+    text-align: center;
+}
+
+.zen-space-subfolder-container {
+    padding-left: 20px;
+}
+
+/* File extension badge */
+.zen-space-extension-badge {
+    font-size: 10px;
+    padding: 1px 4px;
+    border-radius: 3px;
+    margin-left: 4px;
+    text-transform: uppercase;
+    font-weight: 600;
+    background-color: var(--background-modifier-border);
+    color: var(--text-muted);
+    vertical-align: middle;
+}
+
+/* Workspace tab header icon */
+.workspace-tab-header[data-type="zen-space-view"] .workspace-tab-header-inner-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.workspace-tab-header[data-type="zen-space-view"] .workspace-tab-header-inner-icon svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Search box in Zen Space */
+.zen-space-search-container {
+    margin: 0 16px 8px;
+    position: relative;
+}
+
+.zen-space-search-input {
+    width: 100%;
+    padding: 0px 34px !important;
+    border-radius: 4px;
+    border: 1px solid var(--background-modifier-border);
+    background-color: var(--background-primary);
+    color: var(--text-normal);
+    font-size: 13px;
+}
+
+.zen-space-search-icon {
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Quick action buttons */
+.zen-space-file-actions {
+    display: flex;
+    margin-left: auto;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+	position: absolute;
+    right: -0.07vw;
+    float: right;
+	align-items: center;
+	background: var(--background-secondary-alt);
+	margin-right: 4px;
+	height: 24.5px;
+}
+
+.zen-space-file-item:hover .zen-space-file-actions {
+    opacity: 1;
+}
+
+.zen-space-file-action-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: transparent !important;
+	box-shadow: 0px 0px 0px 0px transparent !important;
+    color: var(--text-muted) !important;
+    border: none;
+    padding: 2px;
+    margin-left: 4px;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.zen-space-file-action-button:hover {
+    color: var(--interactive-accent) !important;
+    background-color: var(--background-modifier-hover);
+}
+
+/* Style for pinned action buttons */
+.zen-space-file-action-button.is-pinned {
+    color: var(--interactive-accent) !important;
+}
+
+/* Breadcrumbs */
+.zen-space-breadcrumbs {
+    padding: 4px 15px;
+    display: flex;
+    flex-wrap: wrap;
+    color: var(--text-muted);
+    font-size: 12px;
+    gap: 4px;
+    flex-direction: row;
+    align-items: center;
+    bottom: 0.1vh;
+    position: absolute;
+    box-shadow: 0px 0px 1px 0px gray;
+    width: 100%;
+    left: 0vw;
+	background: var(--background-secondary);
+	z-index: 2;
+	margin-bottom: -1px;
+}
+
+.zen-space-breadcrumb-item {
+    cursor: pointer;
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+
+.zen-space-breadcrumb-item:hover {
+    color: var(--text-normal);
+    background-color: var(--background-modifier-hover);
+}
+
+.zen-space-breadcrumb-separator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Settings for pinned items */
+.zen-space-pinned-items-container {
+    margin-top: 10px;
+    margin-bottom: 20px;
+}
+
+.zen-space-no-pinned-items {
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+.zen-space-pinned-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.zen-space-pinned-item {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 4px 10px;
+    background-color: var(--background-secondary);
+    border-radius: 4px;
+    border-left: 2px solid var(--interactive-accent);
+}
+
+.zen-space-pinned-path {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.zen-space-unpin-button {
+    background-color: transparent;
+    color: var(--text-muted);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.zen-space-unpin-button:hover {
+    background-color: var(--background-modifier-hover);
+    color: var(--text-normal);
+}
+

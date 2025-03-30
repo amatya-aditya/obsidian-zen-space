@@ -1,11 +1,11 @@
 {
-	"id": "sample-plugin",
-	"name": "Sample Plugin",
+	"id": "zen-space",
+	"name": "Zen Space",
 	"version": "1.0.0",
 	"minAppVersion": "0.15.0",
-	"description": "Demonstrates some of the capabilities of the Obsidian API.",
-	"author": "Obsidian",
-	"authorUrl": "https://obsidian.md",
-	"fundingUrl": "https://obsidian.md/pricing",
+	"description": "An enhanced file explorer showing relevant only relevant files when required.",
+	"author": "Aditya Amatya",
+	"authorUrl": "https://github.com/amatya-aditya",
+	"fundingUrl": "https://buymeacoffee.com/amatya_aditya",
 	"isDesktopOnly": false
 }
