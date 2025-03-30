@@ -28,6 +28,9 @@ interface ZenSpaceSettings {
 	showQuickActions: boolean;
 	showBreadcrumbs: boolean;
 	pinnedItems: string[]; // Store paths of pinned items
+	useGridLayoutForIndex: boolean; // Control grid layout for Index file
+	colorfulGridCards: boolean; // Use colorful backgrounds for grid cards
+	simpleGridStyle: boolean; // Remove top border colors from grid cards
 }
 
 const DEFAULT_SETTINGS: ZenSpaceSettings = {
@@ -43,6 +46,9 @@ const DEFAULT_SETTINGS: ZenSpaceSettings = {
 	showQuickActions: true,
 	showBreadcrumbs: true,
 	pinnedItems: [],
+	useGridLayoutForIndex: true, // Default to true for the grid layout
+	colorfulGridCards: true, // Default to colorful cards
+	simpleGridStyle: false, // Default to showing top borders
 };
 
 // Define the view type for our custom view
@@ -123,10 +129,10 @@ class ZenSpaceView extends ItemView {
 		});
 
 		// Create folder title and controls container for better layout
-		const titleContainer = navBar.createEl("div", {
-			cls: "zen-space-title-container",
-		});
-		titleContainer.createEl("h3", { text: this.folder.name });
+		// const titleContainer = navBar.createEl("div", {
+		// 	cls: "zen-space-title-container",
+		// });
+		// titleContainer.createEl("h3", { text: this.folder.name });
 
 		// Create controls container
 		const controlsContainer = navBar.createEl("div", {
@@ -1106,7 +1112,7 @@ class ZenSpaceView extends ItemView {
 			},
 		});
 		pinButton.innerHTML = isPinned
-			? '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="17" x2="12" y2="22"></line><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"></path></svg>'
+			? '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="17" x2="12" y2="22"></line><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78-.9A2 2 0 0 0 5 15.24Z"></path></svg>'
 			: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="17" x2="12" y2="22"></line><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"></path></svg>';
 
 		pinButton.addEventListener("click", (e) => {
@@ -1411,6 +1417,9 @@ export default class ZenSpacePlugin extends Plugin {
 
 		// Load settings
 		await this.loadSettings();
+		
+		// Apply the grid layout classes to the body based on settings
+		this.updateGridLayoutClasses();
 
 		// Register the custom view
 		this.registerView(ZEN_SPACE_VIEW_TYPE, (leaf: WorkspaceLeaf) => {
@@ -1506,6 +1515,23 @@ export default class ZenSpacePlugin extends Plugin {
 
 	async saveSettings() {
 		await this.saveData(this.settings);
+		this.updateGridLayoutClasses();
+	}
+	
+	// Update body classes when settings change
+	updateGridLayoutClasses() {
+		// Add/remove body classes based on settings
+		if (this.settings.colorfulGridCards) {
+			document.body.classList.add('colorful-zen-grid');
+		} else {
+			document.body.classList.remove('colorful-zen-grid');
+		}
+		
+		if (this.settings.simpleGridStyle) {
+			document.body.classList.add('simple-zen-grid');
+		} else {
+			document.body.classList.remove('simple-zen-grid');
+		}
 	}
 
 	setupMutationObserver() {
@@ -1633,8 +1659,10 @@ export default class ZenSpacePlugin extends Plugin {
 		// Remove duplicates
 		const uniqueFiles = [...new Set(files)];
 
-		let content = "";
+		// Add a cssclass to enable grid layout
+		const cssClass = this.settings.useGridLayoutForIndex ? "zen-grid" : "";
 
+		let content = "";
 		if (this.settings.useLongformTemplate) {
 			// Format the files list as YAML for the scenes section
 			const scenesYAML = uniqueFiles
@@ -1643,6 +1671,7 @@ export default class ZenSpacePlugin extends Plugin {
 
 			// Create content for Index file with longform YAML and files list
 			content = `---
+cssclass: ${cssClass}
 longform:
   format: scenes
   title: ${folderName}
@@ -1666,6 +1695,7 @@ ${uniqueFiles.map((file) => `- [[${file}]]`).join("\n")}
 		} else {
 			// Simple Index file without longform properties
 			content = `---
+cssclass: ${cssClass}
 title: ${folderName}
 created: ${formattedDate}
 updated: ${formattedDate}
@@ -1718,6 +1748,12 @@ ${uniqueFiles.map((file) => `- [[${file}]]`).join("\n")}
 			// Format today's date for 'updated' field
 			const today = new Date();
 			const formattedDate = today.toISOString().split("T")[0];
+			
+			// Create file list content
+			const filesListContent = `${uniqueFiles.map((file) => `- [[${file}]]`).join("\n")}`;
+
+			// Get the class to use based on settings
+			const cssClass = this.settings.useGridLayoutForIndex ? "zen-grid" : "";
 
 			// Check if there's frontmatter
 			if (content.startsWith("---")) {
@@ -1732,6 +1768,16 @@ ${uniqueFiles.map((file) => `- [[${file}]]`).join("\n")}
 						/updated:.*\n/,
 						`updated: ${formattedDate}\n`
 					);
+					
+					// Update or add the cssclass in the frontmatter
+					if (frontmatter.includes("cssclass:")) {
+						frontmatter = frontmatter.replace(
+							/cssclass:.*\n/,
+							`cssclass: ${cssClass}\n`
+						);
+					} else {
+						frontmatter = `cssclass: ${cssClass}\n${frontmatter}`;
+					}
 
 					// Check if this is a longform template
 					if (
@@ -1748,16 +1794,12 @@ ${uniqueFiles.map((file) => `- [[${file}]]`).join("\n")}
 						);
 					}
 
-					// Improved regex to capture the entire file list section including all list items
-					// This looks for "Files in this folder:" followed by any content until the next section
-					const fileListRegex =
-						/Files in this folder:[\s\S]*?(?=\n\n#|\n\n---|\n*$)/;
+					// Replace the file list section
+					const fileListRegex = /Files in this folder:[\s\S]*?(?=\n\n#|\n\n---|\n*$)/;
 					const fileListMatch = bodyContent.match(fileListRegex);
 
 					// Create the new file list section
-					const fileListSection = `Files in this folder:\n\n${uniqueFiles
-						.map((file) => `- [[${file}]]`)
-						.join("\n")}`;
+					const fileListSection = `Files in this folder:\n\n${filesListContent}`;
 
 					// Replace or add the file list
 					if (fileListMatch) {
@@ -1789,15 +1831,15 @@ ${uniqueFiles.map((file) => `- [[${file}]]`).join("\n")}
 			} else {
 				// No frontmatter, create a basic index file
 				content = `---
+cssclass: ${cssClass}
 title: ${folder.name}
 updated: ${formattedDate}
 ---
 
 # ${folder.name}
 
-Files in this folder:
 
-${uniqueFiles.map((file) => `- [[${file}]]`).join("\n")}
+${filesListContent}
 `;
 			}
 
@@ -2012,6 +2054,10 @@ ${uniqueFiles.map((file) => `- [[${file}]]`).join("\n")}
 		document
 			.querySelectorAll(".zen-space-button")
 			.forEach((el) => el.remove());
+		
+		// Remove the grid layout classes from body
+		document.body.classList.remove('colorful-zen-grid');
+		document.body.classList.remove('simple-zen-grid');
 	}
 }
 
@@ -2054,6 +2100,39 @@ class ZenSpaceSettingTab extends PluginSettingTab {
 					.setValue(this.plugin.settings.useLongformTemplate)
 					.onChange(async (value) => {
 						this.plugin.settings.useLongformTemplate = value;
+						await this.plugin.saveSettings();
+					})
+			);
+	
+		new Setting(containerEl)
+			.setName("Use grid layout for Index files")
+			.setDesc("Display files in a grid layout for a more visual and elegant presentation")
+			.addToggle((toggle) =>
+				toggle
+					.setValue(this.plugin.settings.useGridLayoutForIndex)
+					.onChange(async (value) => {
+						this.plugin.settings.useGridLayoutForIndex = value;
+						await this.plugin.saveSettings();
+						
+						// Notify user that they'll need to regenerate index files
+						if (value) {
+							new Notice("Grid layout enabled. Reopen folders in Zen Space to update index files.");
+						} else {
+							new Notice("Grid layout disabled. Reopen folders in Zen Space to update index files.");
+						}
+					})
+			);
+			
+
+		// Add simple style option
+		new Setting(containerEl)
+			.setName("Simple grid style")
+			.setDesc("Remove top border colors from grid cards for a cleaner look")
+			.addToggle((toggle) =>
+				toggle
+					.setValue(this.plugin.settings.simpleGridStyle)
+					.onChange(async (value) => {
+						this.plugin.settings.simpleGridStyle = value;
 						await this.plugin.saveSettings();
 					})
 			);

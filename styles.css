@@ -424,3 +424,189 @@
     color: var(--text-normal);
 }
 
+.theme-dark {
+    --zen-grid-bg-color: rgba(50, 50, 50, 0.2);
+    --zen-grid-border-color: rgba(80, 80, 80, 0.2);
+    --zen-grid-card-bg: rgba(40, 40, 40, 0.4);
+    --zen-grid-card-hover-bg: rgba(50, 50, 50, 0.5);
+    --zen-grid-accent-1: rgba(65, 135, 230, 0.6);
+    --zen-grid-accent-2: rgba(65, 180, 170, 0.6);
+    --zen-grid-accent-3: rgba(90, 180, 90, 0.6);
+    --zen-grid-accent-4: rgba(180, 180, 70, 0.6);
+    --zen-grid-accent-5: rgba(220, 150, 80, 0.6);
+    --zen-grid-accent-6: rgba(220, 100, 100, 0.6);
+    --zen-grid-accent-7: rgba(200, 100, 200, 0.6);
+    --zen-grid-accent-8: rgba(150, 100, 220, 0.6);
+    --zen-grid-shadow: rgba(0, 0, 0, 0.15);
+    --zen-grid-shadow-hover: rgba(0, 0, 0, 0.25);
+}
+
+.theme-light {
+    --zen-grid-bg-color: rgba(240, 240, 240, 0.3);
+    --zen-grid-border-color: rgba(210, 210, 210, 0.4);
+    --zen-grid-card-bg: rgba(250, 250, 250, 0.7);
+    --zen-grid-card-hover-bg: rgba(255, 255, 255, 0.9);
+    --zen-grid-accent-1: rgba(65, 135, 230, 0.4);
+    --zen-grid-accent-2: rgba(65, 180, 170, 0.4);
+    --zen-grid-accent-3: rgba(90, 180, 90, 0.4);
+    --zen-grid-accent-4: rgba(180, 180, 70, 0.4);
+    --zen-grid-accent-5: rgba(220, 150, 80, 0.4);
+    --zen-grid-accent-6: rgba(220, 100, 100, 0.4);
+    --zen-grid-accent-7: rgba(200, 100, 200, 0.4);
+    --zen-grid-accent-8: rgba(150, 100, 220, 0.4);
+    --zen-grid-shadow: rgba(0, 0, 0, 0.08);
+    --zen-grid-shadow-hover: rgba(0, 0, 0, 0.12);
+}
+
+/* Grid Layout in Reading Mode */
+.zen-grid ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 0;
+    margin: 1.5em 0;
+    list-style-type: none;
+}
+
+.zen-grid ul > li {
+    flex: 1 1 calc(33.333% - 12px);
+    min-width: 180px;
+    position: relative;
+    display: flex;
+    border-radius: 6px;
+    background-color: var(--zen-grid-card-bg);
+    border: 1px solid var(--zen-grid-border-color);
+    padding: 0;
+    margin: 0 !important;
+    box-shadow: 0 1px 3px var(--zen-grid-shadow);
+    transition: all 0.2s ease;
+    overflow: hidden;
+}
+
+/* Remove the bullet points */
+.zen-grid ul > li .list-bullet:after {
+    display: none;
+}
+
+/* Card hover effects */
+.zen-grid ul > li:hover {
+    transform: translateY(-2px);
+    background-color: var(--zen-grid-card-hover-bg);
+    box-shadow: 0 3px 8px var(--zen-grid-shadow-hover);
+}
+
+/* Style links in the list items */
+.zen-grid ul > li a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 15px;
+    width: 100%;
+    text-align: center;
+    color: var(--text-normal);
+    font-weight: 500;
+    text-decoration: none !important;
+    line-height: 1.4;
+}
+
+/* Remove the file icon */
+.zen-grid ul > li::before {
+    content: none;
+}
+
+/* Remove the "Note" text */
+.zen-grid ul > li::after {
+    content: none;
+}
+
+/* Top accent borders */
+.zen-grid ul > li:nth-of-type(8n+1) {
+    border-top: 3px solid var(--zen-grid-accent-1);
+}
+.zen-grid ul > li:nth-of-type(8n+2) {
+    border-top: 3px solid var(--zen-grid-accent-2);
+}
+.zen-grid ul > li:nth-of-type(8n+3) {
+    border-top: 3px solid var(--zen-grid-accent-3);
+}
+.zen-grid ul > li:nth-of-type(8n+4) {
+    border-top: 3px solid var(--zen-grid-accent-4);
+}
+.zen-grid ul > li:nth-of-type(8n+5) {
+    border-top: 3px solid var(--zen-grid-accent-5);
+}
+.zen-grid ul > li:nth-of-type(8n+6) {
+    border-top: 3px solid var(--zen-grid-accent-6);
+}
+.zen-grid ul > li:nth-of-type(8n+7) {
+    border-top: 3px solid var(--zen-grid-accent-7);
+}
+.zen-grid ul > li:nth-of-type(8n) {
+    border-top: 3px solid var(--zen-grid-accent-8);
+}
+
+/* Remove the top border if simple style is enabled */
+body.simple-zen-grid .zen-grid ul > li:nth-of-type(n) {
+    border-top: none;
+}
+
+/* Make sure the grid is full width */
+:is(.markdown-preview-view,.markdown-rendered).is-readable-line-width.zen-grid .markdown-preview-sizer>div>ul {
+    max-width: 100%;
+}
+
+/* Grid Layout in Live Preview Mode */
+.markdown-source-view.mod-cm6 .cm-content .HyperMD-list-line .cm-hmd-list-indent {
+    display: none;
+}
+
+.zen-grid .markdown-source-view.mod-cm6 .cm-content .HyperMD-list-line {
+    display: inline-block;
+    flex: 1 1 calc(33.333% - 12px);
+    min-width: 180px;
+    margin: 0 6px 12px;
+    background-color: var(--zen-grid-card-bg);
+    border: 1px solid var(--zen-grid-border-color);
+    border-radius: 6px;
+    box-shadow: 0 1px 3px var(--zen-grid-shadow);
+    transition: all 0.2s ease;
+    padding: 20px 15px;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.zen-grid .markdown-source-view.mod-cm6 .cm-content .HyperMD-list-line:hover {
+    transform: translateY(-2px);
+    background-color: var(--zen-grid-card-hover-bg);
+    box-shadow: 0 3px 8px var(--zen-grid-shadow-hover);
+}
+
+.zen-grid .markdown-source-view.mod-cm6 .cm-content .HyperMD-list-line .cm-formatting-list {
+    display: none;
+}
+
+.zen-grid .markdown-source-view.mod-cm6 .cm-content .HyperMD-list-line .cm-list-1 {
+    text-align: center;
+}
+
+/* Add padding to the list container in live preview */
+.zen-grid .markdown-source-view.mod-cm6 .cm-content {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 1em 0;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .zen-grid ul > li,
+    .zen-grid .markdown-source-view.mod-cm6 .cm-content .HyperMD-list-line {
+        flex: 1 1 calc(50% - 12px);
+    }
+}
+
+@media (max-width: 480px) {
+    .zen-grid ul > li,
+    .zen-grid .markdown-source-view.mod-cm6 .cm-content .HyperMD-list-line {
+        flex: 1 1 100%;
+    }
+}
