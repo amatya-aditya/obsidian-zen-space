@@ -239,7 +239,11 @@
 }
 
 .zen-space-subfolder-container {
-    padding-left: 20px;
+    display: none;
+}
+
+.zen-space-subfolder-container.zen-space-expanded {
+    display: block;
 }
 
 /* File extension badge */
@@ -546,17 +550,17 @@
 }
 
 /* Remove the top border if simple style is enabled */
-body.simple-zen-grid .zen-grid ul > li:nth-of-type(n) {
+.zen-grid body.simple-zen-grid .zen-grid ul > li:nth-of-type(n) {
     border-top: none;
 }
 
 /* Make sure the grid is full width */
-:is(.markdown-preview-view,.markdown-rendered).is-readable-line-width.zen-grid .markdown-preview-sizer>div>ul {
+.zen-grid :is(.markdown-preview-view,.markdown-rendered).is-readable-line-width.zen-grid .markdown-preview-sizer>div>ul {
     max-width: 100%;
 }
 
 /* Grid Layout in Live Preview Mode */
-.markdown-source-view.mod-cm6 .cm-content .HyperMD-list-line .cm-hmd-list-indent {
+.zen-grid .markdown-source-view.mod-cm6 .cm-content .HyperMD-list-line .cm-hmd-list-indent {
     display: none;
 }
 
@@ -609,4 +613,8 @@ body.simple-zen-grid .zen-grid ul > li:nth-of-type(n) {
     .zen-grid .markdown-source-view.mod-cm6 .cm-content .HyperMD-list-line {
         flex: 1 1 100%;
     }
+}
+
+.zen-space-button.active {
+    color: var(--interactive-accent);
 }

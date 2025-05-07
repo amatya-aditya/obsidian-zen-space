@@ -13,6 +13,7 @@ import {
 	normalizePath,
 	Modal,
 	MarkdownView,
+	setIcon,
 } from "obsidian";
 
 interface ZenSpaceSettings {
@@ -106,8 +107,8 @@ class ZenSpaceView extends ItemView {
 			`.workspace-tab-header[data-type="${ZEN_SPACE_VIEW_TYPE}"] .workspace-tab-header-inner-icon`
 		);
 		if (tabHeaderIcon) {
-			tabHeaderIcon.innerHTML =
-				'<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4CAF50" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" stroke="#4CAF50"/><circle cx="12" cy="12" r="6" stroke="#4CAF50"/><circle cx="12" cy="12" r="2" fill="#4CAF50"/></svg>';
+			const icon = tabHeaderIcon.createEl('span', { cls: 'zen-space-icon' });
+			setIcon(icon, 'target');
 		}
 	}
 
@@ -188,8 +189,8 @@ class ZenSpaceView extends ItemView {
 			},
 		});
 
-		sortOrderButton.innerHTML =
-			'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-sort-asc"><path d="m3 8 4-4 4 4"></path><path d="M7 4v16"></path><path d="M11 12h4"></path><path d="M11 16h7"></path><path d="M11 20h10"></path></svg>';
+		const sortIcon = sortOrderButton.createEl('span', { cls: 'zen-space-icon' });
+		setIcon(sortIcon, this.currentSortOrder === 'asc' ? 'arrow-up' : 'arrow-down');
 
 		sortOrderButton.addEventListener("click", () => {
 			this.currentSortOrder =
@@ -204,8 +205,8 @@ class ZenSpaceView extends ItemView {
 				"aria-label": "New folder",
 			},
 		});
-		newFolderButton.innerHTML =
-			'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-folder-plus"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"></path><path d="M12 10v6"></path><path d="M9 13h6"></path></svg>';
+		const folderIcon = newFolderButton.createEl('span', { cls: 'zen-space-icon' });
+		setIcon(folderIcon, 'folder-plus');
 
 		newFolderButton.addEventListener("click", async () => {
 			await this.createNewFolder();
@@ -218,8 +219,8 @@ class ZenSpaceView extends ItemView {
 				"aria-label": "New canvas file",
 			},
 		});
-		newCanvasButton.innerHTML =
-			'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-layout-dashboard"><rect width="7" height="9" x="3" y="3" rx="1"></rect><rect width="7" height="5" x="14" y="3" rx="1"></rect><rect width="7" height="9" x="14" y="12" rx="1"></rect><rect width="7" height="5" x="3" y="16" rx="1"></rect></svg>';
+		const canvasIcon = newCanvasButton.createEl('span', { cls: 'zen-space-icon' });
+		setIcon(canvasIcon, 'layout-dashboard');
 
 		newCanvasButton.addEventListener("click", async () => {
 			await this.createNewCanvasFile();
@@ -232,8 +233,8 @@ class ZenSpaceView extends ItemView {
 				"aria-label": "New file",
 			},
 		});
-		newFileButton.innerHTML =
-			'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="svg-icon lucide-file-pen"><path d="M12.5 22H18a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v9.5"></path><path d="M14 2v4a2 2 0 0 0 2 2h4"></path><path d="M13.378 15.626a1 1 0 1 0-3.004-3.004l-5.01 5.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"></path></svg>';
+		const fileIcon = newFileButton.createEl('span', { cls: 'zen-space-icon' });
+		setIcon(fileIcon, 'file-plus');
 
 		newFileButton.addEventListener("click", async () => {
 			await this.createNewFile();
@@ -245,11 +246,8 @@ class ZenSpaceView extends ItemView {
 				cls: "zen-space-search-container",
 			});
 
-			const searchIcon = searchContainer.createEl("div", {
-				cls: "zen-space-search-icon",
-			});
-			searchIcon.innerHTML =
-				'<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>';
+			const searchIcon = searchContainer.createEl('span', { cls: 'zen-space-icon' });
+			setIcon(searchIcon, 'search');
 
 			const searchInput = searchContainer.createEl("input", {
 				cls: "zen-space-search-input",
@@ -886,14 +884,9 @@ class ZenSpaceView extends ItemView {
 				fileItem.addClass("zen-space-folder-item");
 
 				// Add collapse/expand icon
-				const toggleIcon = fileItem.createEl("span", {
-					cls: "zen-space-folder-toggle",
-				});
+				const toggleIcon = fileItem.createEl('span', { cls: 'zen-space-icon' });
 				const isExpanded = this.expandedFolders.has(file.path);
-
-				toggleIcon.innerHTML = isExpanded
-					? '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>'
-					: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>';
+				setIcon(toggleIcon, isExpanded ? 'chevron-down' : 'chevron-right');
 
 				toggleIcon.addEventListener("click", (e) => {
 					e.stopPropagation();
@@ -907,11 +900,8 @@ class ZenSpaceView extends ItemView {
 
 				// Add folder icon if we're not hiding icons
 				if (!this.plugin.settings.hideFileExtensions) {
-					const folderIcon = fileItem.createEl("span", {
-						cls: "zen-space-item-icon",
-					});
-					folderIcon.innerHTML =
-						'<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"></path></svg>';
+					const folderIcon = fileItem.createEl('span', { cls: 'zen-space-icon' });
+					setIcon(folderIcon, 'folder');
 				}
 
 				const nameContainer = fileItem.createEl("div", {
@@ -928,15 +918,13 @@ class ZenSpaceView extends ItemView {
 				});
 
 				// Set display based on expanded state
-				childContainer.style.display = this.expandedFolders.has(
-					file.path
-				)
-					? "block"
-					: "none";
+				childContainer.classList.toggle('zen-space-expanded', this.expandedFolders.has(file.path));
 
 				// Only populate child container if expanded
 				if (this.expandedFolders.has(file.path)) {
-					this.displayFolderContents(file as TFolder, childContainer);
+					if (file instanceof TFolder) {
+						this.displayFolderContents(file, childContainer);
+					}
 				}
 
 				fileItem.addEventListener("click", () => {
@@ -962,21 +950,9 @@ class ZenSpaceView extends ItemView {
 			} else if (file instanceof TFile) {
 				// Add file icon if we're not hiding icons
 				if (!this.plugin.settings.hideFileExtensions) {
-					const fileIcon = fileItem.createEl("span", {
-						cls: "zen-space-item-icon",
-					});
-
-					// Different icon based on file type
-					if (file.extension === "md") {
-						fileIcon.innerHTML =
-							'<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>';
-					} else if (file.extension === "canvas") {
-						fileIcon.innerHTML =
-							'<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect><path d="M21 9h-18"></path><path d="M21 15h-18"></path><path d="M9 3v18"></path><path d="M15 3v18"></path></svg>';
-					} else {
-						fileIcon.innerHTML =
-							'<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>';
-					}
+					const fileIcon = fileItem.createEl('span', { cls: 'zen-space-icon' });
+					setIcon(fileIcon, file.extension === 'md' ? 'file-text' : 
+										file.extension === 'canvas' ? 'layout-dashboard' : 'file');
 				}
 
 				const nameContainer = fileItem.createEl("div", {
@@ -1039,8 +1015,8 @@ class ZenSpaceView extends ItemView {
 				"aria-label": "Open in new pane",
 			},
 		});
-		openInPaneButton.innerHTML =
-			'<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"></rect><path d="M9 3v18"></path></svg>';
+		const openInPaneIcon = openInPaneButton.createEl('span', { cls: 'zen-space-icon' });
+		setIcon(openInPaneIcon, 'split');
 
 		openInPaneButton.addEventListener("click", (e) => {
 			e.stopPropagation();
@@ -1056,9 +1032,8 @@ class ZenSpaceView extends ItemView {
 				"aria-label": isPinned ? "Unpin file" : "Pin file",
 			},
 		});
-		pinButton.innerHTML = isPinned
-			? '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="17" x2="12" y2="22"></line><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"></path></svg>'
-			: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="17" x2="12" y2="22"></line><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"></path></svg>';
+		const pinIcon = pinButton.createEl('span', { cls: 'zen-space-icon' });
+		setIcon(pinIcon, isPinned ? 'pin' : 'pin-off');
 
 		pinButton.addEventListener("click", (e) => {
 			e.stopPropagation();
@@ -1072,8 +1047,8 @@ class ZenSpaceView extends ItemView {
 				"aria-label": "Rename file",
 			},
 		});
-		renameButton.innerHTML =
-			'<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"></path></svg>';
+		const renameIcon = renameButton.createEl('span', { cls: 'zen-space-icon' });
+		setIcon(renameIcon, 'pencil');
 
 		renameButton.addEventListener("click", (e) => {
 			e.stopPropagation();
@@ -1087,8 +1062,8 @@ class ZenSpaceView extends ItemView {
 				"aria-label": "Delete file",
 			},
 		});
-		deleteButton.innerHTML =
-			'<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path></svg>';
+		const deleteIcon = deleteButton.createEl('span', { cls: 'zen-space-icon' });
+		setIcon(deleteIcon, 'trash');
 
 		deleteButton.addEventListener("click", (e) => {
 			e.stopPropagation();
@@ -1111,9 +1086,8 @@ class ZenSpaceView extends ItemView {
 				"aria-label": isPinned ? "Unpin folder" : "Pin folder",
 			},
 		});
-		pinButton.innerHTML = isPinned
-			? '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="17" x2="12" y2="22"></line><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78-.9A2 2 0 0 0 5 15.24Z"></path></svg>'
-			: '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="17" x2="12" y2="22"></line><path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a2 2 0 0 0 0-4H8a2 2 0 0 0 0 4h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"></path></svg>';
+		const pinIcon = pinButton.createEl('span', { cls: 'zen-space-icon' });
+		setIcon(pinIcon, isPinned ? 'pin' : 'pin-off');
 
 		pinButton.addEventListener("click", (e) => {
 			e.stopPropagation();
@@ -1127,8 +1101,8 @@ class ZenSpaceView extends ItemView {
 				"aria-label": "New file in folder",
 			},
 		});
-		newFileButton.innerHTML =
-			'<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>';
+		const newFileIcon = newFileButton.createEl('span', { cls: 'zen-space-icon' });
+		setIcon(newFileIcon, 'file-plus');
 
 		newFileButton.addEventListener("click", (e) => {
 			e.stopPropagation();
@@ -1142,8 +1116,8 @@ class ZenSpaceView extends ItemView {
 				"aria-label": "Open in Zen Space",
 			},
 		});
-		openButton.innerHTML =
-			'<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>';
+		const openIcon = openButton.createEl('span', { cls: 'zen-space-icon' });
+		setIcon(openIcon, 'target');
 
 		openButton.addEventListener("click", (e) => {
 			e.stopPropagation();
@@ -1936,8 +1910,8 @@ ${filesListContent}
 			const buttonEl = document.createElement("div");
 			buttonEl.className = "zen-space-button";
 			buttonEl.setAttribute("aria-label", "Open in Zen Space");
-			buttonEl.innerHTML =
-				'<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2" fill=""/></svg>';
+			const icon = buttonEl.createEl('span', { cls: 'zen-space-icon' });
+			setIcon(icon, 'target');
 
 			// Add click handler
 			buttonEl.addEventListener("click", async (event) => {
@@ -1966,8 +1940,8 @@ ${filesListContent}
 	addCommands() {
 		// Open current folder in Zen Space
 		this.addCommand({
-			id: "open-current-folder-in-zen-space",
-			name: "Open current folder in Zen Space",
+			id: "open-current-folder",
+			name: "Open current folder",
 			checkCallback: (checking: boolean) => {
 				const activeFile = this.app.workspace.getActiveFile();
 				if (activeFile && activeFile.parent) {
@@ -1982,8 +1956,8 @@ ${filesListContent}
 
 		// Create new file in current Zen Space view
 		this.addCommand({
-			id: "create-new-file-in-zen-space",
-			name: "Create new file in current Zen Space view",
+			id: "create-new-file",
+			name: "Create new file",
 			checkCallback: (checking: boolean) => {
 				if (this.activeView) {
 					if (!checking) {
@@ -1997,8 +1971,8 @@ ${filesListContent}
 
 		// Create new folder in current Zen Space view
 		this.addCommand({
-			id: "create-new-folder-in-zen-space",
-			name: "Create new folder in current Zen Space view",
+			id: "create-new-folder",
+			name: "Create new folder",
 			checkCallback: (checking: boolean) => {
 				if (this.activeView) {
 					if (!checking) {
@@ -2012,8 +1986,8 @@ ${filesListContent}
 
 		// Create new canvas file in current Zen Space view
 		this.addCommand({
-			id: "create-new-canvas-in-zen-space",
-			name: "Create new canvas in current Zen Space view",
+			id: "create-new-canvas",
+			name: "Create new canvas",
 			checkCallback: (checking: boolean) => {
 				if (this.activeView) {
 					if (!checking) {
@@ -2027,8 +2001,8 @@ ${filesListContent}
 
 		// Toggle pin status of selected file
 		this.addCommand({
-			id: "toggle-pin-status-in-zen-space",
-			name: "Toggle pin status of selected file in Zen Space",
+			id: "toggle-pin-status",
+			name: "Toggle pin status",
 			checkCallback: (checking: boolean) => {
 				if (this.activeView) {
 					const activeFile = this.app.workspace.getActiveFile();
