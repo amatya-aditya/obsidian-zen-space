@@ -1,4 +1,4 @@
-<h1 align="center">Obsidian Zen Space</h1>
+<h1 align="center">Zen Space</h1>
 <h4 align="center">An enhanced file explorer showing relevant only relevant files when required.</h4>
 
 <p align="center">

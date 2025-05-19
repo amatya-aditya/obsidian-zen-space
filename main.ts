@@ -98,22 +98,11 @@ class ZenSpaceView extends ItemView {
 		});
 	}
 
-	// Add the custom icon to the tab header
 	onload(): void {
 		super.onload();
-
-		// Set the custom icon for the workspace tab
-		const tabHeaderIcon = document.querySelector(
-			`.workspace-tab-header[data-type="${ZEN_SPACE_VIEW_TYPE}"] .workspace-tab-header-inner-icon`
-		);
-		if (tabHeaderIcon) {
-			const icon = tabHeaderIcon.createEl('span', { cls: 'zen-space-icon' });
-			setIcon(icon, 'target');
-		}
 	}
 
 	async onOpen(): Promise<void> {
-		// Clear content
 		this.contentEl = this.containerEl.querySelector(
 			".view-content"
 		) as HTMLElement;
@@ -1383,8 +1372,19 @@ class FolderNameModal extends Modal {
 
 export default class ZenSpacePlugin extends Plugin {
 	settings: ZenSpaceSettings;
-	activeView: ZenSpaceView | null = null;
 	ribbonIcon: HTMLElement | null = null;
+
+	// Helper method to get active ZenSpace view
+	public getActiveZenSpaceView(): ZenSpaceView | null {
+		const leaves = this.app.workspace.getLeavesOfType(ZEN_SPACE_VIEW_TYPE);
+		if (leaves.length > 0) {
+			const view = leaves[0].view;
+			if (view instanceof ZenSpaceView) {
+				return view;
+			}
+		}
+		return null;
+	}
 
 	async onload() {
 		console.log("Loading ZenSpace plugin");
@@ -1397,9 +1397,7 @@ export default class ZenSpacePlugin extends Plugin {
 
 		// Register the custom view
 		this.registerView(ZEN_SPACE_VIEW_TYPE, (leaf: WorkspaceLeaf) => {
-			const view = new ZenSpaceView(leaf, this.app.vault.getRoot(), this);
-			this.activeView = view;
-			return view;
+			return new ZenSpaceView(leaf, this.app.vault.getRoot(), this);
 		});
 
 		// Add settings tab
@@ -1572,7 +1570,6 @@ export default class ZenSpacePlugin extends Plugin {
 		const view = leaf.view as ZenSpaceView;
 		if (view) {
 			view.folder = folder;
-			this.activeView = view;
 			await view.onOpen(); // Refresh the view with the new folder
 		}
 
@@ -1729,96 +1726,54 @@ ${uniqueFiles.map((file) => `- [[${file}]]`).join("\n")}
 			// Get the class to use based on settings
 			const cssClass = this.settings.useGridLayoutForIndex ? "zen-grid" : "";
 
-			// Check if there's frontmatter
-			if (content.startsWith("---")) {
-				// Split the content at the second '---'
-				const parts = content.split("---", 3);
-				if (parts.length >= 3) {
-					let frontmatter = parts[1];
-					let bodyContent = parts[2];
+			// Process the frontmatter
+			await this.app.fileManager.processFrontMatter(indexFile, (frontmatter) => {
+				// Update frontmatter properties
+				frontmatter.updated = formattedDate;
+				frontmatter.cssclass = cssClass;
 
-					// Update the updated date
-					frontmatter = frontmatter.replace(
-						/updated:.*\n/,
-						`updated: ${formattedDate}\n`
-					);
-					
-					// Update or add the cssclass in the frontmatter
-					if (frontmatter.includes("cssclass:")) {
-						frontmatter = frontmatter.replace(
-							/cssclass:.*\n/,
-							`cssclass: ${cssClass}\n`
-						);
+				// Handle longform template if enabled
+				if (this.settings.useLongformTemplate) {
+					if (!frontmatter.longform) {
+						frontmatter.longform = {
+							format: "scenes",
+							title: folder.name,
+							workflow: "Default Workflow",
+							sceneFolder: "/",
+							scenes: uniqueFiles,
+							ignoredFiles: ["Index"]
+						};
 					} else {
-						frontmatter = `cssclass: ${cssClass}\n${frontmatter}`;
+						frontmatter.longform.scenes = uniqueFiles;
 					}
-
-					// Check if this is a longform template
-					if (
-						frontmatter.includes("longform:") &&
-						this.settings.useLongformTemplate
-					) {
-						// Update the scenes section
-						const scenesYAML = uniqueFiles
-							.map((filename) => `    - ${filename}`)
-							.join("\n");
-						frontmatter = frontmatter.replace(
-							/ {2}scenes:\s*\n((?: {4}-.*\n)*)/,
-							`  scenes:\n${scenesYAML || "    "}\n`
-						);
-					}
-
-					// Replace the file list section
-					const fileListRegex = /Files in this folder:[\s\S]*?(?=\n\n#|\n\n---|\n*$)/;
-					const fileListMatch = bodyContent.match(fileListRegex);
-
-					// Create the new file list section
-					const fileListSection = `Files in this folder:\n\n${filesListContent}`;
-
-					// Replace or add the file list
-					if (fileListMatch) {
-						bodyContent = bodyContent.replace(
-							fileListRegex,
-							fileListSection
-						);
-					} else {
-						// If there's no existing file list, add it after the first header
-						const headerMatch = bodyContent.match(/^#[^#].*\n/m);
-						if (headerMatch) {
-							const index =
-								bodyContent.indexOf(headerMatch[0]) +
-								headerMatch[0].length;
-							bodyContent =
-								bodyContent.substring(0, index) +
-								"\n\n" +
-								fileListSection +
-								bodyContent.substring(index);
-						} else {
-							// No header found, just append
-							bodyContent += "\n\n" + fileListSection;
-						}
-					}
-
-					// Reconstruct content with updated frontmatter and body
-					content = `---${frontmatter}---${bodyContent}`;
 				}
+			});
+
+			// Replace the file list section
+			const fileListRegex = /Files in this folder:[\s\S]*?(?=\n\n#|\n\n---|\n*$)/;
+			const fileListMatch = content.match(fileListRegex);
+
+			// Create the new file list section
+			const fileListSection = `Files in this folder:\n\n${filesListContent}`;
+
+			// Replace or add the file list
+			let newBodyContent = content;
+			if (fileListMatch) {
+				newBodyContent = content.replace(fileListRegex, fileListSection);
 			} else {
-				// No frontmatter, create a basic index file
-				content = `---
-cssclass: ${cssClass}
-title: ${folder.name}
-updated: ${formattedDate}
----
-
-# ${folder.name}
-
-
-${filesListContent}
-`;
+				// If there's no existing file list, add it after the first header
+				const headerMatch = content.match(/^#[^#].*\n/m);
+				if (headerMatch) {
+					const index = content.indexOf(headerMatch[0]) + headerMatch[0].length;
+					newBodyContent = content.substring(0, index) + "\n\n" + fileListSection + content.substring(index);
+				} else {
+					// No header found, just append
+					newBodyContent = content + "\n\n" + fileListSection;
+				}
 			}
 
 			// Write updated content back to the file
-			await this.app.vault.modify(indexFile, content);
+			await this.app.vault.modify(indexFile, newBodyContent);
 		} catch (error) {
 			console.error("Error updating Index file:", error);
 		}
@@ -1959,9 +1914,10 @@ ${filesListContent}
 			id: "create-new-file",
 			name: "Create new file",
 			checkCallback: (checking: boolean) => {
-				if (this.activeView) {
+				const view = this.getActiveZenSpaceView();
+				if (view) {
 					if (!checking) {
-						this.activeView.createNewFile();
+						view.createNewFile();
 					}
 					return true;
 				}
@@ -1974,9 +1930,10 @@ ${filesListContent}
 			id: "create-new-folder",
 			name: "Create new folder",
 			checkCallback: (checking: boolean) => {
-				if (this.activeView) {
+				const view = this.getActiveZenSpaceView();
+				if (view) {
 					if (!checking) {
-						this.activeView.createNewFolder();
+						view.createNewFolder();
 					}
 					return true;
 				}
@@ -1987,11 +1944,12 @@ ${filesListContent}
 		// Create new canvas file in current Zen Space view
 		this.addCommand({
 			id: "create-new-canvas",
-			name: "Create new canvas",
+			name: "Create new Canvas",
 			checkCallback: (checking: boolean) => {
-				if (this.activeView) {
+				const view = this.getActiveZenSpaceView();
+				if (view) {
 					if (!checking) {
-						this.activeView.createNewCanvasFile();
+						view.createNewCanvasFile();
 					}
 					return true;
 				}
@@ -2004,14 +1962,15 @@ ${filesListContent}
 			id: "toggle-pin-status",
 			name: "Toggle pin status",
 			checkCallback: (checking: boolean) => {
-				if (this.activeView) {
+				const view = this.getActiveZenSpaceView();
+				if (view) {
 					const activeFile = this.app.workspace.getActiveFile();
 					if (
 						activeFile &&
-						this.activeView.isInCurrentFolder(activeFile)
+						view.isInCurrentFolder(activeFile)
 					) {
 						if (!checking) {
-							this.activeView.togglePinItem(activeFile.path);
+							view.togglePinItem(activeFile.path);
 						}
 						return true;
 					}
@@ -2048,7 +2007,9 @@ class ZenSpaceSettingTab extends PluginSettingTab {
 		containerEl.empty();
 
 		// File Creation Settings
-		containerEl.createEl("h3", { text: "Index file " });
+		new Setting(containerEl)
+			.setName("Index file")
+			.setHeading();
 
 		new Setting(containerEl)
 			.setName("Create index file")
@@ -2112,8 +2073,6 @@ class ZenSpaceSettingTab extends PluginSettingTab {
 			);
 
 		// Display Settings
-		containerEl.createEl("h3", { text: "Other settings" });
-
 		new Setting(containerEl)
 			.setName("Include subfolders")
 			.setDesc("Show subfolders in the Zen Space view")
@@ -2123,23 +2082,23 @@ class ZenSpaceSettingTab extends PluginSettingTab {
 					.onChange(async (value) => {
 						this.plugin.settings.includeSubfolders = value;
 						await this.plugin.saveSettings();
-						if (this.plugin.activeView) {
-							this.plugin.activeView.refreshView();
+						if (this.plugin.getActiveZenSpaceView()) {
+							this.plugin.getActiveZenSpaceView()!.refreshView();
 						}
 					})
 			);
 
 		new Setting(containerEl)
-			.setName("Include canvas files")
-			.setDesc("Show canvas files in the Zen Space view")
+			.setName("Include Canvas files")
+			.setDesc("Show Canvas files in the Zen Space view")
 			.addToggle((toggle) =>
 				toggle
 					.setValue(this.plugin.settings.includeCanvasFiles)
 					.onChange(async (value) => {
 						this.plugin.settings.includeCanvasFiles = value;
 						await this.plugin.saveSettings();
-						if (this.plugin.activeView) {
-							this.plugin.activeView.refreshView();
+						if (this.plugin.getActiveZenSpaceView()) {
+							this.plugin.getActiveZenSpaceView()!.refreshView();
 						}
 					})
 			);
@@ -2155,8 +2114,8 @@ class ZenSpaceSettingTab extends PluginSettingTab {
 					.onChange(async (value) => {
 						this.plugin.settings.includeOtherFormats = value;
 						await this.plugin.saveSettings();
-						if (this.plugin.activeView) {
-							this.plugin.activeView.refreshView();
+						if (this.plugin.getActiveZenSpaceView()) {
+							this.plugin.getActiveZenSpaceView()!.refreshView();
 						}
 					})
 			);
@@ -2170,8 +2129,8 @@ class ZenSpaceSettingTab extends PluginSettingTab {
 					.onChange(async (value) => {
 						this.plugin.settings.hideFileExtensions = value;
 						await this.plugin.saveSettings();
-						if (this.plugin.activeView) {
-							this.plugin.activeView.refreshView();
+						if (this.plugin.getActiveZenSpaceView()) {
+							this.plugin.getActiveZenSpaceView()!.refreshView();
 						}
 					})
 			);
@@ -2185,8 +2144,8 @@ class ZenSpaceSettingTab extends PluginSettingTab {
 					.onChange(async (value) => {
 						this.plugin.settings.showSearchBar = value;
 						await this.plugin.saveSettings();
-						if (this.plugin.activeView) {
-							this.plugin.activeView.refreshView(true);
+						if (this.plugin.getActiveZenSpaceView()) {
+							this.plugin.getActiveZenSpaceView()!.refreshView(true);
 						}
 					})
 			);
@@ -2202,8 +2161,8 @@ class ZenSpaceSettingTab extends PluginSettingTab {
 					.onChange(async (value) => {
 						this.plugin.settings.showQuickActions = value;
 						await this.plugin.saveSettings();
-						if (this.plugin.activeView) {
-							this.plugin.activeView.refreshView();
+						if (this.plugin.getActiveZenSpaceView()) {
+							this.plugin.getActiveZenSpaceView()!.refreshView();
 						}
 					})
 			);
@@ -2219,8 +2178,8 @@ class ZenSpaceSettingTab extends PluginSettingTab {
 					.onChange(async (value) => {
 						this.plugin.settings.showBreadcrumbs = value;
 						await this.plugin.saveSettings();
-						if (this.plugin.activeView) {
-							this.plugin.activeView.refreshView(true);
+						if (this.plugin.getActiveZenSpaceView()) {
+							this.plugin.getActiveZenSpaceView()!.refreshView(true);
 						}
 					})
 			);
@@ -2239,9 +2198,9 @@ class ZenSpaceSettingTab extends PluginSettingTab {
 						async (value: "filename" | "created" | "modified") => {
 							this.plugin.settings.defaultSortBy = value;
 							await this.plugin.saveSettings();
-							if (this.plugin.activeView) {
-								this.plugin.activeView.currentSortBy = value;
-								this.plugin.activeView.refreshView();
+							if (this.plugin.getActiveZenSpaceView()) {
+								this.plugin.getActiveZenSpaceView()!.currentSortBy = value;
+								this.plugin.getActiveZenSpaceView()!.refreshView();
 							}
 						}
 					)
@@ -2258,9 +2217,9 @@ class ZenSpaceSettingTab extends PluginSettingTab {
 					.onChange(async (value: "asc" | "desc") => {
 						this.plugin.settings.defaultSortOrder = value;
 						await this.plugin.saveSettings();
-						if (this.plugin.activeView) {
-							this.plugin.activeView.currentSortOrder = value;
-							this.plugin.activeView.refreshView();
+						if (this.plugin.getActiveZenSpaceView()) {
+							this.plugin.getActiveZenSpaceView()!.currentSortOrder = value;
+							this.plugin.getActiveZenSpaceView()!.refreshView();
 						}
 					})
 			);
