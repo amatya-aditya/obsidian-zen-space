@@ -66,6 +66,7 @@
     border-bottom: 1px solid var(--background-modifier-border);
     margin-bottom: 10px;
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
 }
@@ -86,8 +87,13 @@
 
 .zen-space-controls {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: 8px;
+}
+
+.zen-space-controls button {
+    flex-shrink: 0;
 }
 
 .zen-space-name-container {

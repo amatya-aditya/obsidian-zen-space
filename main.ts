@@ -118,12 +118,6 @@ class ZenSpaceView extends ItemView {
 			cls: "zen-space-nav-bar",
 		});
 
-		// Create folder title and controls container for better layout
-		// const titleContainer = navBar.createEl("div", {
-		// 	cls: "zen-space-title-container",
-		// });
-		// titleContainer.createEl("h3", { text: this.folder.name });
-
 		// Create controls container
 		const controlsContainer = navBar.createEl("div", {
 			cls: "zen-space-controls",
@@ -235,9 +229,6 @@ class ZenSpaceView extends ItemView {
 				cls: "zen-space-search-container",
 			});
 
-			const searchIcon = searchContainer.createEl('span', { cls: 'zen-space-icon' });
-			setIcon(searchIcon, 'search');
-
 			const searchInput = searchContainer.createEl("input", {
 				cls: "zen-space-search-input",
 				attr: {
@@ -246,10 +237,11 @@ class ZenSpaceView extends ItemView {
 				},
 			});
 
+			const searchIcon = searchContainer.createEl('span', { cls: 'zen-space-search-icon' });
+			setIcon(searchIcon, 'search');
+
 			searchInput.addEventListener("input", (e) => {
-				this.searchTerm = (
-					e.target as HTMLInputElement
-				).value.toLowerCase();
+				this.searchTerm = (e.target as HTMLInputElement).value.toLowerCase();
 				this.refreshView();
 			});
 		}
@@ -1160,21 +1152,13 @@ class ZenSpaceView extends ItemView {
 
 	// Delete a folder
 	async deleteFolder(folder: TFolder) {
-		// Confirm deletion
-		const confirmed = confirm(
-			`Are you sure you want to delete "${folder.name}" and all its contents?`
-		);
-
-		if (confirmed) {
+		const message = `Are you sure you want to delete "${folder.name}" and all its contents?`;
+		new ConfirmModal(this.app, message, async () => {
 			try {
 				// Remove folder and its contents from pinned items
-				this.plugin.settings.pinnedItems =
-					this.plugin.settings.pinnedItems.filter(
-						(item) =>
-							!item.startsWith(folder.path + "/") &&
-							item !== folder.path
-					);
-
+				this.plugin.settings.pinnedItems = this.plugin.settings.pinnedItems.filter(
+					(item) => !item.startsWith(folder.path + "/") && item !== folder.path
+				);
 				await this.app.vault.delete(folder, true);
 				await this.plugin.saveSettings();
 				new Notice(`Folder deleted: ${folder.name}`);
@@ -1182,7 +1166,7 @@ class ZenSpaceView extends ItemView {
 			} catch (error) {
 				new Notice(`Error deleting folder: ${error}`);
 			}
-		}
+		}).open();
 	}
 
 	// Rename a file
@@ -1236,35 +1220,28 @@ class ZenSpaceView extends ItemView {
 
 	// Delete a file
 	async deleteFile(file: TFile) {
-		// Confirm deletion
-		const confirmed = confirm(
-			`Are you sure you want to delete "${file.name}"?`
-		);
-
-		if (confirmed) {
+		const message = `Are you sure you want to delete "${file.name}"?`;
+		new ConfirmModal(this.app, message, async () => {
 			const folder = file.parent;
-
 			try {
 				// Remove from pinned items if needed
 				if (this.isItemPinned(file.path)) {
-					this.plugin.settings.pinnedItems =
-						this.plugin.settings.pinnedItems.filter(
-							(item) => item !== file.path
-						);
+					this.plugin.settings.pinnedItems = this.plugin.settings.pinnedItems.filter(
+						(item) => item !== file.path
+					);
 					await this.plugin.saveSettings();
 				}
-
 				await this.app.vault.delete(file);
 				new Notice(`File deleted: ${file.name}`);
-
-				// Update the Index file
+				// Update the Index file if needed
 				if (this.plugin.settings.createIndexFile && folder) {
 					await this.plugin.updateIndexFileContent(folder);
 				}
+				this.refreshView();
 			} catch (error) {
 				new Notice(`Error deleting file: ${error}`);
 			}
-		}
+		}).open();
 	}
 
 	// Helper to sort files based on current settings
@@ -1367,6 +1344,37 @@ class FolderNameModal extends Modal {
 		const { contentEl } = this;
 		contentEl.empty();
 		this.onSubmit(this.result);
+	}
+}
+
+// New ConfirmModal class for custom delete confirmation
+class ConfirmModal extends Modal {
+	private message: string;
+	private onConfirm: () => void;
+
+	constructor(app: App, message: string, onConfirm: () => void) {
+		super(app);
+		this.message = message;
+		this.onConfirm = onConfirm;
+	}
+
+	onOpen() {
+		const { contentEl } = this;
+		contentEl.createEl('h2', { text: 'Confirm Deletion' });
+		contentEl.createEl('p', { text: this.message });
+		const buttonContainer = contentEl.createEl('div', { cls: 'zen-space-modal-button-container' });
+		const cancelButton = buttonContainer.createEl('button', { text: 'Cancel' });
+		cancelButton.addEventListener('click', () => this.close());
+		const confirmButton = buttonContainer.createEl('button', { text: 'Delete' });
+		confirmButton.addEventListener('click', () => {
+			this.onConfirm();
+			this.close();
+		});
+	}
+
+	onClose() {
+		const { contentEl } = this;
+		contentEl.empty();
 	}
 }
 
