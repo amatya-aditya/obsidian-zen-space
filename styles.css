@@ -66,7 +66,7 @@
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
 }
 
 .zen-space-title-container {
@@ -155,9 +155,9 @@
     color: var(--text-muted) !important;
     border: none;
     cursor: pointer;
-    padding: 4px;
     border-radius: 4px;
     transition: color 0.2s ease;
+    padding: 0px 6px !important;
 }
 
 .zen-space-sort-order:hover {
@@ -180,8 +180,13 @@
     line-height: var(--line-height-tight);
 	align-items: center;
 	height: 24.5px;
-	padding: var(--nav-item-parent-padding);
+	padding: 2px 6px !important;
     position: relative;
+    gap: 5px;
+}
+
+.zen-space-file-item .zen-space-folder-item .zen-space-name-container span.zen-space-item-name.zen-space-file-name{
+    padding-left: 20px !important;
 }
 
 .zen-space-pinned-item {
@@ -503,6 +508,7 @@
     font-weight: 500;
     text-decoration: none !important;
     line-height: 1.4;
+    margin-left: 25px;
 }
 
 .zen-grid ul > li::before {
@@ -601,4 +607,50 @@
 
 .zen-space-button.active {
     color: var(--interactive-accent);
+}
+
+/* 1. Allow long filenames to wrap and show tooltip */
+.zen-grid .zen-space-file-list .zen-space-file-item {
+  word-break: break-word;
+  white-space: normal;
+  overflow: visible;
+}
+.zen-grid .zen-space-file-list .zen-space-file-item .zen-space-item-name {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
+}
+.zen-grid .zen-space-file-list .zen-space-file-item .zen-space-item-name[title] {
+  cursor: help;
+}
+
+.markdown-preview-section :is(p,div):has(> .cm-formatting-list-ul) {
+  margin-left: 1.5em;
+}
+
+.zen-space-sort-menu {
+  background: var(--background-secondary, #222);
+  border: 1px solid var(--background-modifier-border, #444);
+  border-radius: 6px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+  min-width: 220px;
+  padding: 6px 0;
+  z-index: 9999;
+}
+
+.zen-space-sort-menu-item {
+  padding: 8px 18px;
+  color: var(--text-normal, #fff);
+  cursor: pointer;
+  font-size: 15px;
+  transition: background 0.15s;
+  user-select: none;
+}
+
+.zen-space-sort-menu-item:hover,
+.zen-space-sort-menu-item.is-active {
+  background: var(--background-modifier-hover, #333);
+  color: var(--interactive-accent, #ffd700);
 }

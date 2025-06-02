@@ -64,6 +64,10 @@ class ZenSpaceView extends ItemView {
 	public currentSortOrder: "asc" | "desc";
 	private searchTerm = "";
 	private expandedFolders: Set<string> = new Set(); 
+	private folderHistory: TFolder[] = [];
+	private historyIndex: number = -1;
+	private backButton: HTMLButtonElement | null = null;
+	private forwardButton: HTMLButtonElement | null = null;
 
 	constructor(leaf: WorkspaceLeaf, folder: TFolder, plugin: ZenSpacePlugin) {
 		super(leaf);
@@ -124,60 +128,62 @@ class ZenSpaceView extends ItemView {
 		});
 
 		
-		const sortContainer = controlsContainer.createEl("div", {
-			cls: "zen-space-sort-selector",
+		const sortButton = controlsContainer.createEl("button", {
+			cls: "zen-space-sort-button",
+			attr: { "aria-label": "Sort options" },
 		});
-		sortContainer.createEl("span", {
-			cls: "zen-space-sort-label",
-		});
+		const sortIcon = sortButton.createEl('span', { cls: 'zen-space-icon' });
+		setIcon(sortIcon, 'arrow-up-down');
 
 		
-		const sortSelect = sortContainer.createEl("select", {
-			cls: "zen-space-sort-select",
-		});
-
-		
-		const sortOptions = [
-			{ value: "filename", text: "Name" },
-			{ value: "created", text: "Created" },
-			{ value: "modified", text: "Modified" },
-		];
-
-		sortOptions.forEach((option) => {
-			const optionEl = sortSelect.createEl("option", {
-				text: option.text,
-				value: option.value,
-			});
-
-			if (option.value === this.currentSortBy) {
-				optionEl.selected = true;
+		let sortMenu: HTMLDivElement | null = null;
+		sortButton.addEventListener("click", (e) => {
+			e.stopPropagation();
+			if (sortMenu) {
+				if (sortMenu) sortMenu.remove();
+				sortMenu = null;
+				return;
 			}
-		});
-
-		
-		sortSelect.addEventListener("change", () => {
-			this.currentSortBy = sortSelect.value as
-				| "filename"
-				| "created"
-				| "modified";
-			this.refreshView();
-		});
-
-		
-		const sortOrderButton = controlsContainer.createEl("button", {
-			cls: "zen-space-sort-order",
-			attr: {
-				"aria-label": "Toggle sort order",
-			},
-		});
-
-		const sortIcon = sortOrderButton.createEl('span', { cls: 'zen-space-icon' });
-		setIcon(sortIcon, this.currentSortOrder === 'asc' ? 'arrow-up' : 'arrow-down');
-
-		sortOrderButton.addEventListener("click", () => {
-			this.currentSortOrder =
-				this.currentSortOrder === "asc" ? "desc" : "asc";
-			this.refreshView();
+			sortMenu = document.createElement("div");
+			sortMenu.className = "zen-space-sort-menu";
+			sortMenu.style.position = "absolute";
+			sortMenu.style.zIndex = "1000";
+			const rect = sortButton.getBoundingClientRect();
+			sortMenu.style.left = rect.left + "px";
+			sortMenu.style.top = rect.bottom + window.scrollY + "px";
+			
+			const options = [
+				{ by: "filename", order: "asc", label: "File name (A to Z)" },
+				{ by: "filename", order: "desc", label: "File name (Z to A)" },
+				{ by: "modified", order: "desc", label: "Modified time (new to old)" },
+				{ by: "modified", order: "asc", label: "Modified time (old to new)" },
+				{ by: "created", order: "desc", label: "Created time (new to old)" },
+				{ by: "created", order: "asc", label: "Created time (old to new)" },
+			];
+			options.forEach(opt => {
+				const item = document.createElement("div");
+				item.className = "zen-space-sort-menu-item" + (this.currentSortBy === opt.by && this.currentSortOrder === opt.order ? " is-active" : "");
+				item.textContent = opt.label;
+				item.addEventListener("click", () => {
+					this.currentSortBy = opt.by as any;
+					this.currentSortOrder = opt.order as any;
+					this.refreshView();
+					if (sortMenu) sortMenu.remove();
+					sortMenu = null;
+				});
+				if (sortMenu) sortMenu.appendChild(item);
+			});
+			document.body.appendChild(sortMenu);
+			
+			const closeMenu = (ev: MouseEvent) => {
+				if (!sortMenu) return;
+				if (!sortMenu.contains(ev.target as Node)) {
+					sortMenu.remove();
+					sortMenu = null;
+					document.removeEventListener("mousedown", closeMenu);
+				}
+			};
+			setTimeout(() => document.addEventListener("mousedown", closeMenu), 0);
 		});
 
 		
@@ -223,6 +229,36 @@ class ZenSpaceView extends ItemView {
 		});
 
 		
+		// --- Back and Forward buttons ---
+		this.backButton = controlsContainer.createEl("button", {
+			cls: "zen-space-nav-back",
+			attr: { "aria-label": "Back" },
+		});
+		setIcon(this.backButton, "arrow-left");
+		this.backButton.disabled = this.historyIndex <= 0;
+		this.backButton.addEventListener("click", () => {
+			if (this.historyIndex > 0) {
+				this.historyIndex--;
+				this.folder = this.folderHistory[this.historyIndex];
+				this.refreshView(true);
+			}
+		});
+
+		this.forwardButton = controlsContainer.createEl("button", {
+			cls: "zen-space-nav-forward",
+			attr: { "aria-label": "Forward" },
+		});
+		setIcon(this.forwardButton, "arrow-right");
+		this.forwardButton.disabled = this.historyIndex >= this.folderHistory.length - 1;
+		this.forwardButton.addEventListener("click", () => {
+			if (this.historyIndex < this.folderHistory.length - 1) {
+				this.historyIndex++;
+				this.folder = this.folderHistory[this.historyIndex];
+				this.refreshView(true);
+			}
+		});
+
+		
 		if (this.plugin.settings.showSearchBar) {
 			const searchContainer = this.contentEl.createEl("div", {
 				cls: "zen-space-search-container",
@@ -255,6 +291,14 @@ class ZenSpaceView extends ItemView {
 
 		
 		this.registerFileEvents();
+
+		// After rendering, update button states
+		this.updateNavButtons();
+	}
+
+	updateNavButtons() {
+		if (this.backButton) this.backButton.disabled = this.historyIndex <= 0;
+		if (this.forwardButton) this.forwardButton.disabled = this.historyIndex >= this.folderHistory.length - 1;
 	}
 
 	
@@ -396,8 +440,18 @@ class ZenSpaceView extends ItemView {
 
 	
 	navigateToFolder(folder: TFolder) {
+		if (this.historyIndex === -1 || this.folder !== folder) {
+			// If navigating to a new folder, update history
+			this.folderHistory = this.folderHistory.slice(0, this.historyIndex + 1);
+			this.folderHistory.push(folder);
+			this.historyIndex = this.folderHistory.length - 1;
+		}
 		this.folder = folder;
+		if (this.plugin.settings.createIndexFile) {
+			this.plugin.createIndexFile(folder);
+		}
 		this.refreshView(true);
+		this.updateNavButtons();
 	}
 
 	
@@ -1246,33 +1300,18 @@ class ZenSpaceView extends ItemView {
 	
 	sortFiles(files: TAbstractFile[]): TAbstractFile[] {
 		return files.sort((a, b) => {
-			
 			const aPinned = this.isItemPinned(a.path);
 			const bPinned = this.isItemPinned(b.path);
-
-			
 			if (aPinned && !bPinned) return -1;
 			if (!aPinned && bPinned) return 1;
-
-			
-
-			
 			if (a instanceof TFolder && !(b instanceof TFolder)) return -1;
 			if (!(a instanceof TFolder) && b instanceof TFolder) return 1;
-
-			
 			let comparison = 0;
-
 			if (this.currentSortBy === "filename") {
-				comparison = a.name.localeCompare(b.name);
+				comparison = naturalCompare(a.name, b.name);
 			} else if (a instanceof TFile && b instanceof TFile) {
-				
-				comparison =
-					this.getFileTime(a, this.currentSortBy) -
-					this.getFileTime(b, this.currentSortBy);
+				comparison = this.getFileTime(a, this.currentSortBy) - this.getFileTime(b, this.currentSortBy);
 			}
-
-			
 			return this.currentSortOrder === "asc" ? comparison : -comparison;
 		});
 	}
@@ -1607,47 +1646,74 @@ export default class ZenSpacePlugin extends Plugin {
 	}
 
 	
+	private getAllFilesInFolder(folder: TFolder): { files: TFile[], subfolders: Map<string, TFile[]> } {
+		let files: TFile[] = [];
+		let subfolders = new Map<string, TFile[]>();
+		
+		// Add files from current folder
+		files = files.concat(folder.children.filter((file): file is TFile => file instanceof TFile));
+		
+		// If includeSubfolders is enabled, recursively add files from subfolders
+		if (this.settings.includeSubfolders) {
+			folder.children.forEach(child => {
+				if (child instanceof TFolder) {
+					const subfolderFiles = this.getAllFilesInFolder(child);
+					subfolders.set(child.path, subfolderFiles.files);
+					// Merge subfolder maps
+					subfolderFiles.subfolders.forEach((files, path) => {
+						subfolders.set(path, files);
+					});
+				}
+			});
+		}
+		
+		return { files, subfolders };
+	}
+
 	async createIndexFile(folder: TFolder) {
 		const folderName = folder.name;
 		const indexPath = `${folder.path}/Index.md`;
 
-		
+		// Check if index file already exists
 		const existingFile = this.app.vault.getAbstractFileByPath(indexPath);
 		if (existingFile instanceof TFile) {
-			
+			// If it exists, update its content
 			await this.updateIndexFileContent(folder);
 			return;
 		}
 
-		
 		const today = new Date();
 		const formattedDate = today.toISOString().split("T")[0];
 
+		// Get all files in the folder and its subfolders if includeSubfolders is enabled
+		const { files, subfolders } = this.getAllFilesInFolder(folder);
 		
-		const files = folder.children
-			.filter(
-				(file) =>
-					file instanceof TFile &&
-					file.extension === "md" &&
-					file.name !== "Index.md"
-			)
-			.map((file) => file.name.replace(/\.md$/, ""))
+		// Filter and process files
+		const currentFolderFiles = files
+			.filter(file => file.extension === "md" && file.name !== "Index.md")
+			.map(file => file.name.replace(/\.md$/, ""))
 			.sort();
 
-		
-		const uniqueFiles = [...new Set(files)];
-
-		
+		// Add CSS class for grid layout if enabled
 		const cssClass = this.settings.useGridLayoutForIndex ? "zen-grid" : "";
 
+		// Create content sections
 		let content = "";
 		if (this.settings.useLongformTemplate) {
-			
+			// Create YAML for scenes
+			const allFiles = [...currentFolderFiles];
+			subfolders.forEach(files => {
+				files.forEach(file => {
+					if (file.extension === "md" && file.name !== "Index.md") {
+						allFiles.push(file.name.replace(/\.md$/, ""));
+					}
+				});
+			});
+			const uniqueFiles = [...new Set(allFiles)].sort();
 			const scenesYAML = uniqueFiles
 				.map((filename) => `    - ${filename}`)
 				.join("\n");
 
-			
 			content = `---
 cssclass: ${cssClass}
 longform:
@@ -1665,13 +1731,19 @@ updated: ${formattedDate}
 ---
 
 # ${folderName}
+${currentFolderFiles.length > 0 ? currentFolderFiles.map((file) => `- [[${file}]]`).join("\n") : ""}
 
-Files in this folder:
-
-${uniqueFiles.map((file) => `- [[${file}]]`).join("\n")}
-`;
+${this.settings.includeSubfolders ? Array.from(subfolders.entries()).map(([path, files]) => {
+	const folderName = path.split("/").pop();
+	const depth = path.split("/").length - folder.path.split("/").length;
+	const headingLevel = "#".repeat(depth + 1); // +1 because root is #
+	const fileList = files
+		.filter(file => file.extension === "md" && file.name !== "Index.md")
+		.map(file => file.name.replace(/\.md$/, ""))
+		.sort();
+	return fileList.length > 0 ? `${headingLevel} ${folderName}\n${fileList.map(file => `- [[${file}]]`).join("\n")}` : "";
+}).filter(Boolean).join("\n\n") : ""}`;
 		} else {
-			
 			content = `---
 cssclass: ${cssClass}
 title: ${folderName}
@@ -1680,14 +1752,20 @@ updated: ${formattedDate}
 ---
 
 # ${folderName}
+${currentFolderFiles.length > 0 ? currentFolderFiles.map((file) => `- [[${file}]]`).join("\n") : ""}
 
-Files in this folder:
-
-${uniqueFiles.map((file) => `- [[${file}]]`).join("\n")}
-`;
+${this.settings.includeSubfolders ? Array.from(subfolders.entries()).map(([path, files]) => {
+	const folderName = path.split("/").pop();
+	const depth = path.split("/").length - folder.path.split("/").length;
+	const headingLevel = "#".repeat(depth + 1); // +1 because root is #
+	const fileList = files
+		.filter(file => file.extension === "md" && file.name !== "Index.md")
+		.map(file => file.name.replace(/\.md$/, ""))
+		.sort();
+	return fileList.length > 0 ? `${headingLevel} ${folderName}\n${fileList.map(file => `- [[${file}]]`).join("\n")}` : "";
+}).filter(Boolean).join("\n\n") : ""}`;
 		}
 
-		
 		try {
 			await this.app.vault.create(indexPath, content);
 			new Notice(`Created Index file in ${folderName}`);
@@ -1696,7 +1774,6 @@ ${uniqueFiles.map((file) => `- [[${file}]]`).join("\n")}
 		}
 	}
 
-	
 	async updateIndexFileContent(folder: TFolder) {
 		const indexPath = `${folder.path}/Index.md`;
 		const indexFile = this.app.vault.getAbstractFileByPath(indexPath);
@@ -1706,41 +1783,41 @@ ${uniqueFiles.map((file) => `- [[${file}]]`).join("\n")}
 		}
 
 		try {
-			
+			// Read current content
 			let content = await this.app.vault.read(indexFile);
 
+			// Get all files in the folder and its subfolders if includeSubfolders is enabled
+			const { files, subfolders } = this.getAllFilesInFolder(folder);
 			
-			const files = folder.children
-				.filter(
-					(file) =>
-						file instanceof TFile &&
-						file.extension === "md" &&
-						file.name !== "Index.md"
-				)
-				.map((file) => file.name.replace(/\.md$/, ""))
+			// Filter and process files
+			const currentFolderFiles = files
+				.filter(file => file.extension === "md" && file.name !== "Index.md")
+				.map(file => file.name.replace(/\.md$/, ""))
 				.sort();
 
-			
-			const uniqueFiles = [...new Set(files)];
-
-			
+			// Update the date
 			const today = new Date();
 			const formattedDate = today.toISOString().split("T")[0];
-			
-			
-			const filesListContent = `${uniqueFiles.map((file) => `- [[${file}]]`).join("\n")}`;
 
-			
+			// Add CSS class for grid layout if enabled
 			const cssClass = this.settings.useGridLayoutForIndex ? "zen-grid" : "";
 
-			
+			// Update frontmatter
 			await this.app.fileManager.processFrontMatter(indexFile, (frontmatter) => {
-				
 				frontmatter.updated = formattedDate;
 				frontmatter.cssclass = cssClass;
 
-				
 				if (this.settings.useLongformTemplate) {
+					const allFiles = [...currentFolderFiles];
+					subfolders.forEach(files => {
+						files.forEach(file => {
+							if (file.extension === "md" && file.name !== "Index.md") {
+								allFiles.push(file.name.replace(/\.md$/, ""));
+							}
+						});
+					});
+					const uniqueFiles = [...new Set(allFiles)].sort();
+					
 					if (!frontmatter.longform) {
 						frontmatter.longform = {
 							format: "scenes",
@@ -1756,31 +1833,29 @@ ${uniqueFiles.map((file) => `- [[${file}]]`).join("\n")}
 				}
 			});
 
-			
-			const fileListRegex = /Files in this folder:[\s\S]*?(?=\n\n#|\n\n---|\n*$)/;
-			const fileListMatch = content.match(fileListRegex);
+			// Create the new content
+			const newContent = `---
+cssclass: ${cssClass}
+title: ${folder.name}
+created: ${formattedDate}
+updated: ${formattedDate}
+---
 
-			
-			const fileListSection = `Files in this folder:\n\n${filesListContent}`;
+# ${folder.name}
+${currentFolderFiles.length > 0 ? currentFolderFiles.map((file) => `- [[${file}]]`).join("\n") : ""}
 
-			
-			let newBodyContent = content;
-			if (fileListMatch) {
-				newBodyContent = content.replace(fileListRegex, fileListSection);
-			} else {
-				
-				const headerMatch = content.match(/^#[^#].*\n/m);
-				if (headerMatch) {
-					const index = content.indexOf(headerMatch[0]) + headerMatch[0].length;
-					newBodyContent = content.substring(0, index) + "\n\n" + fileListSection + content.substring(index);
-				} else {
-					
-					newBodyContent = content + "\n\n" + fileListSection;
-				}
-			}
+${this.settings.includeSubfolders ? Array.from(subfolders.entries()).map(([path, files]) => {
+	const folderName = path.split("/").pop();
+	const depth = path.split("/").length - folder.path.split("/").length;
+	const headingLevel = "#".repeat(depth + 1); // +1 because root is #
+	const fileList = files
+		.filter(file => file.extension === "md" && file.name !== "Index.md")
+		.map(file => file.name.replace(/\.md$/, ""))
+		.sort();
+	return fileList.length > 0 ? `${headingLevel} ${folderName}\n${fileList.map(file => `- [[${file}]]`).join("\n")}` : "";
+}).filter(Boolean).join("\n\n") : ""}`;
 
-			
-			await this.app.vault.modify(indexFile, newBodyContent);
+			await this.app.vault.modify(indexFile, newContent);
 		} catch (error) {
 			console.error("Error updating Index file:", error);
 		}
@@ -2081,8 +2156,8 @@ class ZenSpaceSettingTab extends PluginSettingTab {
 
 		
 		new Setting(containerEl)
-			.setName("Include subfolders")
-			.setDesc("Show subfolders in the Zen Space view")
+			.setName("Include files from subfolders")
+			.setDesc("Include files from subfolders in both the Zen Space view and index files")
 			.addToggle((toggle) =>
 				toggle
 					.setValue(this.plugin.settings.includeSubfolders)
@@ -2231,4 +2306,19 @@ class ZenSpaceSettingTab extends PluginSettingTab {
 					})
 			);
 	}
+}
+
+function naturalCompare(a: string, b: string): number {
+	// Split strings into digit and non-digit parts
+	const ax: [number, string][] = [];
+	const bx: [number, string][] = [];
+	a.replace(/(\d+)|(\D+)/g, (_, $1, $2) => { ax.push([$1 ? parseInt($1, 10) : Infinity, $2 || ""]); return ''; });
+	b.replace(/(\d+)|(\D+)/g, (_, $1, $2) => { bx.push([$1 ? parseInt($1, 10) : Infinity, $2 || ""]); return ''; });
+	while (ax.length && bx.length) {
+		const an = ax.shift()!;
+		const bn = bx.shift()!;
+		const nn = (an[0] - bn[0]) || an[1].localeCompare(bn[1]);
+		if (nn) return nn;
+	}
+	return ax.length - bx.length;
 }
