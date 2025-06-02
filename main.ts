@@ -28,10 +28,10 @@ interface ZenSpaceSettings {
 	showSearchBar: boolean;
 	showQuickActions: boolean;
 	showBreadcrumbs: boolean;
-	pinnedItems: string[]; // Store paths of pinned items
-	useGridLayoutForIndex: boolean; // Control grid layout for Index file
-	colorfulGridCards: boolean; // Use colorful backgrounds for grid cards
-	simpleGridStyle: boolean; // Remove top border colors from grid cards
+	pinnedItems: string[]; 
+	useGridLayoutForIndex: boolean; 
+	colorfulGridCards: boolean; 
+	simpleGridStyle: boolean; 
 }
 
 const DEFAULT_SETTINGS: ZenSpaceSettings = {
@@ -47,12 +47,12 @@ const DEFAULT_SETTINGS: ZenSpaceSettings = {
 	showQuickActions: true,
 	showBreadcrumbs: true,
 	pinnedItems: [],
-	useGridLayoutForIndex: true, // Default to true for the grid layout
-	colorfulGridCards: true, // Default to colorful cards
-	simpleGridStyle: false, // Default to showing top borders
+	useGridLayoutForIndex: true, 
+	colorfulGridCards: true, 
+	simpleGridStyle: false, 
 };
 
-// Define the view type for our custom view
+
 const ZEN_SPACE_VIEW_TYPE = "zen-space-view";
 
 class ZenSpaceView extends ItemView {
@@ -63,7 +63,7 @@ class ZenSpaceView extends ItemView {
 	public currentSortBy: "filename" | "created" | "modified";
 	public currentSortOrder: "asc" | "desc";
 	private searchTerm = "";
-	private expandedFolders: Set<string> = new Set(); // Track expanded folders
+	private expandedFolders: Set<string> = new Set(); 
 
 	constructor(leaf: WorkspaceLeaf, folder: TFolder, plugin: ZenSpacePlugin) {
 		super(leaf);
@@ -85,7 +85,7 @@ class ZenSpaceView extends ItemView {
 		return "target";
 	}
 
-	// Called after this.containerEl is created and before this.onOpen()
+	
 	onPaneMenu(menu: Menu, source: string): void {
 		super.onPaneMenu(menu, source);
 
@@ -108,36 +108,35 @@ class ZenSpaceView extends ItemView {
 		) as HTMLElement;
 		this.contentEl.empty();
 
-		// Add breadcrumbs if enabled
+		
 		if (this.plugin.settings.showBreadcrumbs) {
 			this.renderBreadcrumbs();
 		}
 
-		// Create navigation bar with folder name and buttons
+		
 		const navBar = this.contentEl.createEl("div", {
 			cls: "zen-space-nav-bar",
 		});
 
-		// Create controls container
+		
 		const controlsContainer = navBar.createEl("div", {
 			cls: "zen-space-controls",
 		});
 
-		// Add sort selector
+		
 		const sortContainer = controlsContainer.createEl("div", {
 			cls: "zen-space-sort-selector",
 		});
 		sortContainer.createEl("span", {
-			text: "Sort:",
 			cls: "zen-space-sort-label",
 		});
 
-		// Create sort by dropdown
+		
 		const sortSelect = sortContainer.createEl("select", {
 			cls: "zen-space-sort-select",
 		});
 
-		// Add options
+		
 		const sortOptions = [
 			{ value: "filename", text: "Name" },
 			{ value: "created", text: "Created" },
@@ -155,7 +154,7 @@ class ZenSpaceView extends ItemView {
 			}
 		});
 
-		// Add event listener
+		
 		sortSelect.addEventListener("change", () => {
 			this.currentSortBy = sortSelect.value as
 				| "filename"
@@ -164,7 +163,7 @@ class ZenSpaceView extends ItemView {
 			this.refreshView();
 		});
 
-		// Add sort order button with updated SVG
+		
 		const sortOrderButton = controlsContainer.createEl("button", {
 			cls: "zen-space-sort-order",
 			attr: {
@@ -181,7 +180,7 @@ class ZenSpaceView extends ItemView {
 			this.refreshView();
 		});
 
-		// Add "New Folder" button
+		
 		const newFolderButton = controlsContainer.createEl("button", {
 			cls: "zen-space-new-folder-button",
 			attr: {
@@ -195,7 +194,7 @@ class ZenSpaceView extends ItemView {
 			await this.createNewFolder();
 		});
 
-		// Add "New Canvas File" button
+		
 		const newCanvasButton = controlsContainer.createEl("button", {
 			cls: "zen-space-new-canvas-button",
 			attr: {
@@ -209,7 +208,7 @@ class ZenSpaceView extends ItemView {
 			await this.createNewCanvasFile();
 		});
 
-		// Add "New File" button
+		
 		const newFileButton = controlsContainer.createEl("button", {
 			cls: "zen-space-new-file-button",
 			attr: {
@@ -223,7 +222,7 @@ class ZenSpaceView extends ItemView {
 			await this.createNewFile();
 		});
 
-		// Add search bar if enabled
+		
 		if (this.plugin.settings.showSearchBar) {
 			const searchContainer = this.contentEl.createEl("div", {
 				cls: "zen-space-search-container",
@@ -246,28 +245,28 @@ class ZenSpaceView extends ItemView {
 			});
 		}
 
-		// Create file list container
+		
 		this.fileListContainer = this.contentEl.createEl("div", {
 			cls: "zen-space-file-list",
 		});
 
-		// Display files in folder
+		
 		this.displayFolderContents(this.folder, this.fileListContainer, true);
 
-		// Set up event listeners for file changes
+		
 		this.registerFileEvents();
 	}
 
-	// Render breadcrumbs for navigation
+	
 	renderBreadcrumbs() {
 		const breadcrumbs = this.contentEl.createEl("div", {
 			cls: "zen-space-breadcrumbs",
 		});
 
-		// Start with root
+		
 		const root = this.app.vault.getRoot();
 
-		// Build the breadcrumb path
+		
 		const path = [];
 		let currentFolder = this.folder;
 
@@ -280,7 +279,7 @@ class ZenSpaceView extends ItemView {
 			}
 		}
 
-		// Add root
+		
 		const rootItem = breadcrumbs.createEl("span", {
 			text: "Root",
 			cls: "zen-space-breadcrumb-item",
@@ -289,7 +288,7 @@ class ZenSpaceView extends ItemView {
 			this.navigateToFolder(root);
 		});
 
-		// Add separator if needed
+		
 		if (path.length > 0) {
 			breadcrumbs.createEl("span", {
 				text: "/",
@@ -297,7 +296,7 @@ class ZenSpaceView extends ItemView {
 			});
 		}
 
-		// Add path items
+		
 		path.forEach((folder, index) => {
 			const item = breadcrumbs.createEl("span", {
 				text: folder.name,
@@ -308,7 +307,7 @@ class ZenSpaceView extends ItemView {
 				this.navigateToFolder(folder);
 			});
 
-			// Add separator if not the last item
+			
 			if (index < path.length - 1) {
 				breadcrumbs.createEl("span", {
 					text: "/",
@@ -318,34 +317,34 @@ class ZenSpaceView extends ItemView {
 		});
 	}
 
-	// Check if an item is pinned
+	
 	isItemPinned(path: string): boolean {
 		return this.plugin.settings.pinnedItems.includes(path);
 	}
 
-	// Toggle pin status of an item
+	
 	async togglePinItem(path: string) {
 		const pinnedItems = this.plugin.settings.pinnedItems;
 		const isPinned = pinnedItems.includes(path);
 
 		if (isPinned) {
-			// Remove from pinned items
+			
 			this.plugin.settings.pinnedItems = pinnedItems.filter(
 				(item) => item !== path
 			);
 		} else {
-			// Add to pinned items
+			
 			this.plugin.settings.pinnedItems.push(path);
 		}
 
-		// Save settings
+		
 		await this.plugin.saveSettings();
 
-		// Refresh view to update sorting
+		
 		this.refreshView();
 	}
 
-	// Create a new folder
+	
 	async createNewFolder() {
 		const folderName = await new Promise<string | null>((resolve) => {
 			new FolderNameModal(this.app, "Enter folder name", resolve).open();
@@ -363,9 +362,9 @@ class ZenSpaceView extends ItemView {
 		}
 	}
 
-	// Create a new canvas file
+	
 	async createNewCanvasFile() {
-		// Create a suggested name based on current date/time
+		
 		const timestamp = new Date()
 			.toISOString()
 			.replace(/[:.]/g, "-")
@@ -376,7 +375,7 @@ class ZenSpaceView extends ItemView {
 			const newFilePath = normalizePath(
 				`${this.folder.path}/${suggestedName}`
 			);
-			// Create canvas file with empty canvas data structure
+			
 			const canvasData = {
 				nodes: [],
 				edges: [],
@@ -387,7 +386,7 @@ class ZenSpaceView extends ItemView {
 				JSON.stringify(canvasData, null, 2)
 			);
 
-			// Open the new canvas file
+			
 			this.app.workspace.getLeaf().openFile(newFile);
 			new Notice(`Canvas file created: ${suggestedName}`);
 		} catch (error) {
@@ -395,15 +394,15 @@ class ZenSpaceView extends ItemView {
 		}
 	}
 
-	// Navigate to a different folder
+	
 	navigateToFolder(folder: TFolder) {
 		this.folder = folder;
 		this.refreshView(true);
 	}
 
-	// Register events to refresh view when files change
+	
 	registerFileEvents() {
-		// When files are created or deleted
+		
 		this.registerEvent(
 			this.app.vault.on("create", (file) => {
 				if (this.isInCurrentFolder(file)) {
@@ -422,7 +421,7 @@ class ZenSpaceView extends ItemView {
 
 		this.registerEvent(
 			this.app.vault.on("rename", (file, oldPath) => {
-				// Check if either the old or new path is in our folder
+				
 				if (
 					this.isInCurrentFolder(file) ||
 					this.isPathInCurrentFolder(oldPath)
@@ -444,7 +443,7 @@ class ZenSpaceView extends ItemView {
 		);
 	}
 
-	// Helper to check if a file is in the current folder
+	
 	isInCurrentFolder(file: TAbstractFile): boolean {
 		if (!this.plugin.settings.includeSubfolders) {
 			return file.parent === this.folder;
@@ -457,7 +456,7 @@ class ZenSpaceView extends ItemView {
 		);
 	}
 
-	// Helper to check if a path is in the current folder
+	
 	isPathInCurrentFolder(path: string): boolean {
 		if (!this.plugin.settings.includeSubfolders) {
 			return (
@@ -469,32 +468,32 @@ class ZenSpaceView extends ItemView {
 		return path.startsWith(this.folder.path + "/");
 	}
 
-	// Create a new file in the current folder
+	
 	async createNewFile() {
-		// Create a suggested name based on current date/time
+		
 		const timestamp = new Date()
 			.toISOString()
 			.replace(/[:.]/g, "-")
 			.substring(0, 19);
 		const suggestedName = `Untitled ${timestamp}.md`;
 
-		// Create the file
+		
 		try {
 			const newFilePath = normalizePath(
 				`${this.folder.path}/${suggestedName}`
 			);
 			const newFile = await this.app.vault.create(newFilePath, "");
 
-			// Update the Index file after creating a new file
+			
 			if (this.plugin.settings.createIndexFile) {
 				await this.plugin.updateIndexFileContent(this.folder);
 			}
 
-			// Open the new file
+			
 			const leaf = this.app.workspace.getLeaf();
 			await leaf.openFile(newFile);
 
-			// Put the editor in edit mode and focus it - using the correct API
+			
 			const activeView =
 				this.app.workspace.getActiveViewOfType(MarkdownView);
 			if (activeView?.editor) {
@@ -505,32 +504,32 @@ class ZenSpaceView extends ItemView {
 		}
 	}
 
-	// Create a new file in a specified folder
+	
 	async createNewFileInFolder(folder: TFolder) {
-		// Create a suggested name based on current date/time
+		
 		const timestamp = new Date()
 			.toISOString()
 			.replace(/[:.]/g, "-")
 			.substring(0, 19);
 		const suggestedName = `Untitled ${timestamp}.md`;
 
-		// Create the file
+		
 		try {
 			const newFilePath = normalizePath(
 				`${folder.path}/${suggestedName}`
 			);
 			const newFile = await this.app.vault.create(newFilePath, "");
 
-			// Update the Index file after creating a new file
+			
 			if (this.plugin.settings.createIndexFile) {
 				await this.plugin.updateIndexFileContent(folder);
 			}
 
-			// Open the new file
+			
 			const leaf = this.app.workspace.getLeaf();
 			await leaf.openFile(newFile);
 
-			// Put the editor in edit mode and focus it - using the correct API
+			
 			const activeLeaf = this.app.workspace.getActiveViewOfType;
 			if (
 				activeLeaf &&
@@ -546,9 +545,9 @@ class ZenSpaceView extends ItemView {
 		}
 	}
 
-	// Create a new canvas file in a specified folder
+	
 	async createNewCanvasFileInFolder(folder: TFolder) {
-		// Create a suggested name based on current date/time
+		
 		const timestamp = new Date()
 			.toISOString()
 			.replace(/[:.]/g, "-")
@@ -559,7 +558,7 @@ class ZenSpaceView extends ItemView {
 			const newFilePath = normalizePath(
 				`${folder.path}/${suggestedName}`
 			);
-			// Create canvas file with empty canvas data structure
+			
 			const canvasData = {
 				nodes: [],
 				edges: [],
@@ -570,7 +569,7 @@ class ZenSpaceView extends ItemView {
 				JSON.stringify(canvasData, null, 2)
 			);
 
-			// Open the new canvas file
+			
 			this.app.workspace.getLeaf().openFile(newFile);
 			new Notice(`Canvas file created: ${suggestedName}`);
 		} catch (error) {
@@ -578,7 +577,7 @@ class ZenSpaceView extends ItemView {
 		}
 	}
 
-	// Create a new subfolder in a specified folder
+	
 	async createNewSubfolder(parentFolder: TFolder) {
 		const folderName = await new Promise<string | null>((resolve) => {
 			new FolderNameModal(this.app, "Enter folder name", resolve).open();
@@ -596,10 +595,10 @@ class ZenSpaceView extends ItemView {
 		}
 	}
 
-	// Refresh the view with current folder contents
+	
 	refreshView(fullRefresh = false) {
 		if (fullRefresh) {
-			// Full refresh includes updating the breadcrumbs
+			
 			this.onOpen();
 			return;
 		}
@@ -614,7 +613,7 @@ class ZenSpaceView extends ItemView {
 		}
 	}
 
-	// Helper to get a file's creation or modification time
+	
 	getFileTime(file: TFile, type: "created" | "modified"): number {
 		if (type === "created") {
 			return file.stat.ctime;
@@ -623,57 +622,57 @@ class ZenSpaceView extends ItemView {
 		}
 	}
 
-	// Helper to format the display name of a file
+	
 	formatDisplayName(file: TAbstractFile): string {
 		if (file instanceof TFolder) {
 			return file.name;
 		}
 
 		if (this.plugin.settings.hideFileExtensions && file instanceof TFile) {
-			// Remove the extension from display name
+			
 			return file.name.slice(0, -(file.extension.length + 1));
 		}
 
 		return file.name;
 	}
 
-	// Helper to check if a file should be included based on settings
+	
 	shouldIncludeFile(file: TAbstractFile): boolean {
 		if (file instanceof TFolder) {
 			return this.plugin.settings.includeSubfolders;
 		}
 
-		// File must be a TFile to check extension
+		
 		if (file instanceof TFile) {
-			// Canvas files
+			
 			if (file.extension === "canvas") {
 				return this.plugin.settings.includeCanvasFiles;
 			}
 
-			// Markdown files always included
+			
 			if (file.extension === "md") {
 				return true;
 			}
 
-			// Other formats
+			
 			return this.plugin.settings.includeOtherFormats;
 		}
 
 		return false;
 	}
 
-	// Helper to check if a file matches the search term
+	
 	matchesSearch(file: TAbstractFile): boolean {
 		if (!this.searchTerm) return true;
 
 		return file.name.toLowerCase().includes(this.searchTerm);
 	}
 
-	// Display folder context menu
+	
 	showFolderContextMenu(folder: TFolder, event: MouseEvent) {
 		const menu = new Menu();
 
-		// Open in Zen Space
+		
 		menu.addItem((item) => {
 			item.setTitle("Open in Zen Space")
 				.setIcon("target")
@@ -682,7 +681,7 @@ class ZenSpaceView extends ItemView {
 				});
 		});
 
-		// Pin/Unpin folder
+		
 		const isPinned = this.isItemPinned(folder.path);
 		menu.addItem((item) => {
 			item.setTitle(isPinned ? "Unpin folder" : "Pin folder")
@@ -692,7 +691,7 @@ class ZenSpaceView extends ItemView {
 				});
 		});
 
-		// New file in folder
+		
 		menu.addItem((item) => {
 			item.setTitle("New file")
 				.setIcon("file-plus")
@@ -701,7 +700,7 @@ class ZenSpaceView extends ItemView {
 				});
 		});
 
-		// New canvas file in folder
+		
 		menu.addItem((item) => {
 			item.setTitle("New canvas")
 				.setIcon("layout-dashboard")
@@ -710,7 +709,7 @@ class ZenSpaceView extends ItemView {
 				});
 		});
 
-		// New subfolder
+		
 		menu.addItem((item) => {
 			item.setTitle("New subfolder")
 				.setIcon("folder-plus")
@@ -719,10 +718,10 @@ class ZenSpaceView extends ItemView {
 				});
 		});
 
-		// Separator
+		
 		menu.addSeparator();
 
-		// Rename folder
+		
 		menu.addItem((item) => {
 			item.setTitle("Rename")
 				.setIcon("pencil")
@@ -731,7 +730,7 @@ class ZenSpaceView extends ItemView {
 				});
 		});
 
-		// Delete folder
+		
 		menu.addItem((item) => {
 			item.setTitle("Delete")
 				.setIcon("trash")
@@ -740,15 +739,15 @@ class ZenSpaceView extends ItemView {
 				});
 		});
 
-		// Show the menu at the click position
+		
 		menu.showAtPosition({ x: event.clientX, y: event.clientY });
 	}
 
-	// Display file context menu
+	
 	showFileContextMenu(file: TFile, event: MouseEvent) {
 		const menu = new Menu();
 
-		// Open file
+		
 		menu.addItem((item) => {
 			item.setTitle("Open")
 				.setIcon("file")
@@ -757,7 +756,7 @@ class ZenSpaceView extends ItemView {
 				});
 		});
 
-		// Open in new tab
+		
 		menu.addItem((item) => {
 			item.setTitle("Open in new tab")
 				.setIcon("file-plus")
@@ -766,7 +765,7 @@ class ZenSpaceView extends ItemView {
 				});
 		});
 
-		// Open in new pane
+		
 		menu.addItem((item) => {
 			item.setTitle("Open in new pane")
 				.setIcon("split")
@@ -775,7 +774,7 @@ class ZenSpaceView extends ItemView {
 				});
 		});
 
-		// Pin/Unpin file
+		
 		const isPinned = this.isItemPinned(file.path);
 		menu.addItem((item) => {
 			item.setTitle(isPinned ? "Unpin file" : "Pin file")
@@ -785,10 +784,10 @@ class ZenSpaceView extends ItemView {
 				});
 		});
 
-		// Separator
+		
 		menu.addSeparator();
 
-		// Rename file
+		
 		menu.addItem((item) => {
 			item.setTitle("Rename")
 				.setIcon("pencil")
@@ -797,7 +796,7 @@ class ZenSpaceView extends ItemView {
 				});
 		});
 
-		// Delete file
+		
 		menu.addItem((item) => {
 			item.setTitle("Delete")
 				.setIcon("trash")
@@ -806,7 +805,7 @@ class ZenSpaceView extends ItemView {
 				});
 		});
 
-		// Show the menu at the click position
+		
 		menu.showAtPosition({ x: event.clientX, y: event.clientY });
 	}
 
@@ -815,15 +814,15 @@ class ZenSpaceView extends ItemView {
 		container: HTMLElement,
 		isRootFolder = false
 	) {
-		// Get all files that should be included based on settings
+		
 		let filesToDisplay = folder.children.filter((file) => {
-			// For root folder, always include subfolders in the list if settings allow
+			
 			if (isRootFolder && file instanceof TFolder) {
 				return this.plugin.settings.includeSubfolders;
 			}
 
-			// For subfolders, only process the files; subfolder contents will be
-			// handled when the subfolder is expanded
+			
+			
 			if (!isRootFolder && file instanceof TFolder) {
 				return false;
 			}
@@ -831,12 +830,12 @@ class ZenSpaceView extends ItemView {
 			return this.shouldIncludeFile(file) && this.matchesSearch(file);
 		});
 
-		// Skip processing if no files to display and not the root folder
+		
 		if (filesToDisplay.length === 0 && !isRootFolder) {
 			return;
 		}
 
-		// Sort files based on current sort settings
+		
 		filesToDisplay = this.sortFiles(filesToDisplay);
 
 		if (filesToDisplay.length === 0) {
@@ -849,22 +848,22 @@ class ZenSpaceView extends ItemView {
 			return;
 		}
 
-		// Create list element for each file
+		
 		for (const file of filesToDisplay) {
 			const fileItem = container.createEl("div", {
 				cls: "zen-space-file-item",
 			});
 
-			// Add pinned indicator class if the file is pinned
+			
 			if (this.isItemPinned(file.path)) {
 				fileItem.addClass("zen-space-pinned-item");
 			}
 
-			// Different styling for files vs folders
+			
 			if (file instanceof TFolder) {
 				fileItem.addClass("zen-space-folder-item");
 
-				// Add collapse/expand icon
+				
 				const toggleIcon = fileItem.createEl('span', { cls: 'zen-space-icon' });
 				const isExpanded = this.expandedFolders.has(file.path);
 				setIcon(toggleIcon, isExpanded ? 'chevron-down' : 'chevron-right');
@@ -879,7 +878,7 @@ class ZenSpaceView extends ItemView {
 					this.refreshView();
 				});
 
-				// Add folder icon if we're not hiding icons
+				
 				if (!this.plugin.settings.hideFileExtensions) {
 					const folderIcon = fileItem.createEl('span', { cls: 'zen-space-icon' });
 					setIcon(folderIcon, 'folder');
@@ -893,15 +892,15 @@ class ZenSpaceView extends ItemView {
 					cls: "zen-space-item-name zen-space-file-name",
 				});
 
-				// Make folder clickable to toggle expansion
+				
 				const childContainer = container.createEl("div", {
 					cls: "zen-space-subfolder-container",
 				});
 
-				// Set display based on expanded state
+				
 				childContainer.classList.toggle('zen-space-expanded', this.expandedFolders.has(file.path));
 
-				// Only populate child container if expanded
+				
 				if (this.expandedFolders.has(file.path)) {
 					if (file instanceof TFolder) {
 						this.displayFolderContents(file, childContainer);
@@ -918,18 +917,18 @@ class ZenSpaceView extends ItemView {
 					this.refreshView();
 				});
 
-				// Add context menu on right click
+				
 				fileItem.addEventListener("contextmenu", (e) => {
 					e.preventDefault();
 					this.showFolderContextMenu(file as TFolder, e);
 				});
 
-				// Add quick actions if enabled
+				
 				if (this.plugin.settings.showQuickActions) {
 					this.addFolderActions(fileItem, file as TFolder);
 				}
 			} else if (file instanceof TFile) {
-				// Add file icon if we're not hiding icons
+				
 				if (!this.plugin.settings.hideFileExtensions) {
 					const fileIcon = fileItem.createEl('span', { cls: 'zen-space-icon' });
 					setIcon(fileIcon, file.extension === 'md' ? 'file-text' : 
@@ -940,13 +939,13 @@ class ZenSpaceView extends ItemView {
 					cls: "zen-space-name-container",
 				});
 
-				// Display name without extension if setting is enabled
+				
 				nameContainer.createEl("span", {
 					text: this.formatDisplayName(file),
 					cls: "zen-space-item-name zen-space-file-name",
 				});
 
-				// Add extension badge for non-markdown files if not hiding extensions
+				
 				if (
 					!this.plugin.settings.hideFileExtensions &&
 					file.extension !== "md"
@@ -957,9 +956,9 @@ class ZenSpaceView extends ItemView {
 					});
 				}
 
-				// Make file clickable to open
+				
 				fileItem.addEventListener("click", (e) => {
-					// Only open if the click wasn't on an action button
+					
 					if (
 						!(e.target as HTMLElement).closest(
 							".zen-space-file-action-button"
@@ -969,13 +968,13 @@ class ZenSpaceView extends ItemView {
 					}
 				});
 
-				// Add context menu on right click
+				
 				fileItem.addEventListener("contextmenu", (e) => {
 					e.preventDefault();
 					this.showFileContextMenu(file, e);
 				});
 
-				// Add quick actions if enabled
+				
 				if (this.plugin.settings.showQuickActions) {
 					this.addFileActions(fileItem, file);
 				}
@@ -983,13 +982,13 @@ class ZenSpaceView extends ItemView {
 		}
 	}
 
-	// Add quick action buttons for files
+	
 	addFileActions(fileItem: HTMLElement, file: TFile) {
 		const actionsContainer = fileItem.createEl("div", {
 			cls: "zen-space-file-actions",
 		});
 
-		// Open in new pane button
+		
 		const openInPaneButton = actionsContainer.createEl("button", {
 			cls: "zen-space-file-action-button",
 			attr: {
@@ -1004,7 +1003,7 @@ class ZenSpaceView extends ItemView {
 			this.app.workspace.getLeaf("split").openFile(file);
 		});
 
-		// Pin/Unpin button
+		
 		const isPinned = this.isItemPinned(file.path);
 		const pinButton = actionsContainer.createEl("button", {
 			cls:
@@ -1021,7 +1020,7 @@ class ZenSpaceView extends ItemView {
 			this.togglePinItem(file.path);
 		});
 
-		// Rename button
+		
 		const renameButton = actionsContainer.createEl("button", {
 			cls: "zen-space-file-action-button",
 			attr: {
@@ -1036,7 +1035,7 @@ class ZenSpaceView extends ItemView {
 			this.renameFile(file);
 		});
 
-		// Delete button
+		
 		const deleteButton = actionsContainer.createEl("button", {
 			cls: "zen-space-file-action-button",
 			attr: {
@@ -1052,13 +1051,13 @@ class ZenSpaceView extends ItemView {
 		});
 	}
 
-	// Add quick action buttons for folders
+	
 	addFolderActions(fileItem: HTMLElement, folder: TFolder) {
 		const actionsContainer = fileItem.createEl("div", {
 			cls: "zen-space-file-actions",
 		});
 
-		// Pin/Unpin button
+		
 		const isPinned = this.isItemPinned(folder.path);
 		const pinButton = actionsContainer.createEl("button", {
 			cls:
@@ -1075,7 +1074,7 @@ class ZenSpaceView extends ItemView {
 			this.togglePinItem(folder.path);
 		});
 
-		// New file in folder button
+		
 		const newFileButton = actionsContainer.createEl("button", {
 			cls: "zen-space-file-action-button",
 			attr: {
@@ -1090,7 +1089,7 @@ class ZenSpaceView extends ItemView {
 			this.createNewFileInFolder(folder);
 		});
 
-		// Open in Zen Space button
+		
 		const openButton = actionsContainer.createEl("button", {
 			cls: "zen-space-file-action-button",
 			attr: {
@@ -1106,11 +1105,11 @@ class ZenSpaceView extends ItemView {
 		});
 	}
 
-	// Rename a folder
+	
 	async renameFolder(folder: TFolder) {
 		const currentName = folder.name;
 
-		// Get new name from user
+		
 		const newName = await new Promise<string | null>((resolve) => {
 			new FolderNameModal(
 				this.app,
@@ -1121,16 +1120,16 @@ class ZenSpaceView extends ItemView {
 
 		if (newName && newName !== currentName) {
 			try {
-				// The promptForFileRename method handles the actual rename operation
+				
 				new Notice(`Folder renamed to ${newName}`);
 
-				// Update any pinned items with the new path
+				
 				const oldPath = folder.path;
 				const newPath = folder.parent
 					? `${folder.parent.path}/${newName}`
 					: newName;
 
-				// Update pinned items that contain this path
+				
 				this.plugin.settings.pinnedItems =
 					this.plugin.settings.pinnedItems.map((item) => {
 						if (item === oldPath) {
@@ -1150,12 +1149,12 @@ class ZenSpaceView extends ItemView {
 		}
 	}
 
-	// Delete a folder
+	
 	async deleteFolder(folder: TFolder) {
 		const message = `Are you sure you want to delete "${folder.name}" and all its contents?`;
 		new ConfirmModal(this.app, message, async () => {
 			try {
-				// Remove folder and its contents from pinned items
+				
 				this.plugin.settings.pinnedItems = this.plugin.settings.pinnedItems.filter(
 					(item) => !item.startsWith(folder.path + "/") && item !== folder.path
 				);
@@ -1169,13 +1168,13 @@ class ZenSpaceView extends ItemView {
 		}).open();
 	}
 
-	// Rename a file
+	
 	async renameFile(file: TFile) {
 		const currentName = file.name;
 		const oldFolder = file.parent;
 		const oldPath = file.path;
 
-		// Get new name from user
+		
 		const newName = await new Promise<string | null>((resolve) => {
 			new FolderNameModal(
 				this.app,
@@ -1186,10 +1185,10 @@ class ZenSpaceView extends ItemView {
 
 		if (newName && newName !== currentName) {
 			try {
-				// The promptForFileRename method handles the actual rename operation
+				
 				new Notice(`File renamed to ${newName}`);
 
-				// Update pinned items
+				
 				const newPath = file.parent
 					? `${file.parent.path}/${newName}`
 					: newName;
@@ -1200,14 +1199,14 @@ class ZenSpaceView extends ItemView {
 
 				await this.plugin.saveSettings();
 
-				// Update the Index file
+				
 				if (this.plugin.settings.createIndexFile) {
-					// Update old folder's index if the file was moved
+					
 					if (file.parent !== oldFolder && oldFolder) {
 						await this.plugin.updateIndexFileContent(oldFolder);
 					}
 
-					// Update current folder's index
+					
 					if (file.parent) {
 						await this.plugin.updateIndexFileContent(file.parent);
 					}
@@ -1218,13 +1217,13 @@ class ZenSpaceView extends ItemView {
 		}
 	}
 
-	// Delete a file
+	
 	async deleteFile(file: TFile) {
 		const message = `Are you sure you want to delete "${file.name}"?`;
 		new ConfirmModal(this.app, message, async () => {
 			const folder = file.parent;
 			try {
-				// Remove from pinned items if needed
+				
 				if (this.isItemPinned(file.path)) {
 					this.plugin.settings.pinnedItems = this.plugin.settings.pinnedItems.filter(
 						(item) => item !== file.path
@@ -1233,7 +1232,7 @@ class ZenSpaceView extends ItemView {
 				}
 				await this.app.vault.delete(file);
 				new Notice(`File deleted: ${file.name}`);
-				// Update the Index file if needed
+				
 				if (this.plugin.settings.createIndexFile && folder) {
 					await this.plugin.updateIndexFileContent(folder);
 				}
@@ -1244,42 +1243,42 @@ class ZenSpaceView extends ItemView {
 		}).open();
 	}
 
-	// Helper to sort files based on current settings
+	
 	sortFiles(files: TAbstractFile[]): TAbstractFile[] {
 		return files.sort((a, b) => {
-			// First separate pinned items
+			
 			const aPinned = this.isItemPinned(a.path);
 			const bPinned = this.isItemPinned(b.path);
 
-			// Pinned items always come first
+			
 			if (aPinned && !bPinned) return -1;
 			if (!aPinned && bPinned) return 1;
 
-			// If both are pinned or both are not pinned, continue with normal sorting
+			
 
-			// Always put folders before files (unless pinned status is different)
+			
 			if (a instanceof TFolder && !(b instanceof TFolder)) return -1;
 			if (!(a instanceof TFolder) && b instanceof TFolder) return 1;
 
-			// For two files or two folders, sort by the selected criteria
+			
 			let comparison = 0;
 
 			if (this.currentSortBy === "filename") {
 				comparison = a.name.localeCompare(b.name);
 			} else if (a instanceof TFile && b instanceof TFile) {
-				// Only TFiles have created/modified times
+				
 				comparison =
 					this.getFileTime(a, this.currentSortBy) -
 					this.getFileTime(b, this.currentSortBy);
 			}
 
-			// Adjust for sort order
+			
 			return this.currentSortOrder === "asc" ? comparison : -comparison;
 		});
 	}
 }
 
-// Modal for folder name input
+
 class FolderNameModal extends Modal {
 	result: string | null = null;
 	onSubmit: (result: string | null) => void;
@@ -1322,7 +1321,7 @@ class FolderNameModal extends Modal {
 			text: "Cancel",
 		});
 
-		// Submit on enter key
+		
 		folderNameInput.addEventListener("keydown", (e) => {
 			if (e.key === "Enter") {
 				this.result = folderNameInput.value;
@@ -1347,7 +1346,7 @@ class FolderNameModal extends Modal {
 	}
 }
 
-// New ConfirmModal class for custom delete confirmation
+
 class ConfirmModal extends Modal {
 	private message: string;
 	private onConfirm: () => void;
@@ -1382,7 +1381,7 @@ export default class ZenSpacePlugin extends Plugin {
 	settings: ZenSpaceSettings;
 	ribbonIcon: HTMLElement | null = null;
 
-	// Helper method to get active ZenSpace view
+	
 	public getActiveZenSpaceView(): ZenSpaceView | null {
 		const leaves = this.app.workspace.getLeavesOfType(ZEN_SPACE_VIEW_TYPE);
 		if (leaves.length > 0) {
@@ -1397,21 +1396,21 @@ export default class ZenSpacePlugin extends Plugin {
 	async onload() {
 		console.log("Loading ZenSpace plugin");
 
-		// Load settings
+		
 		await this.loadSettings();
 		
-		// Apply the grid layout classes to the body based on settings
+		
 		this.updateGridLayoutClasses();
 
-		// Register the custom view
+		
 		this.registerView(ZEN_SPACE_VIEW_TYPE, (leaf: WorkspaceLeaf) => {
 			return new ZenSpaceView(leaf, this.app.vault.getRoot(), this);
 		});
 
-		// Add settings tab
+		
 		this.addSettingTab(new ZenSpaceSettingTab(this.app, this));
 
-		// Add ribbon icon
+		
 		this.ribbonIcon = this.addRibbonIcon(
 			"target",
 			"Open Zen Space",
@@ -1420,10 +1419,10 @@ export default class ZenSpacePlugin extends Plugin {
 			}
 		);
 
-		// Register commands for hotkeys
+		
 		this.addCommands();
 
-		// Register context menu event on folders
+		
 		this.registerEvent(
 			this.app.workspace.on("file-menu", (menu, file) => {
 				if (file instanceof TFolder) {
@@ -1438,17 +1437,17 @@ export default class ZenSpacePlugin extends Plugin {
 			})
 		);
 
-		// Register events to update Index files when files change
+		
 		this.registerIndexFileUpdateEvents();
 
-		// Register an interval that continuously adds buttons
+		
 		this.registerInterval(
 			window.setInterval(() => {
 				this.addZenSpaceButtons();
 			}, 1000)
 		);
 
-		// Register events for file explorer updates
+		
 		const fileExplorer = document.querySelector(".nav-files-container");
 		if (fileExplorer) {
 			const observer = new MutationObserver(() => {
@@ -1458,7 +1457,7 @@ export default class ZenSpacePlugin extends Plugin {
 			this.register(() => observer.disconnect());
 		}
 
-		// Additional events for folder changes
+		
 		this.registerEvent(
 			this.app.vault.on("create", (file) => {
 				setTimeout(() => this.addZenSpaceButtons(), 100);
@@ -1471,17 +1470,17 @@ export default class ZenSpacePlugin extends Plugin {
 			})
 		);
 
-		// Create a mutation observer to watch for DOM changes
+		
 		this.setupMutationObserver();
 
-		// Initial calls to add buttons
+		
 		for (const delay of [100, 300, 500, 1000, 2000]) {
 			setTimeout(() => {
 				this.addZenSpaceButtons();
 			}, delay);
 		}
 
-		// Add immediately as well
+		
 		this.addZenSpaceButtons();
 	}
 
@@ -1498,9 +1497,9 @@ export default class ZenSpacePlugin extends Plugin {
 		this.updateGridLayoutClasses();
 	}
 	
-	// Update body classes when settings change
+	
 	updateGridLayoutClasses() {
-		// Add/remove body classes based on settings
+		
 		if (this.settings.colorfulGridCards) {
 			document.body.classList.add('colorful-zen-grid');
 		} else {
@@ -1531,7 +1530,7 @@ export default class ZenSpacePlugin extends Plugin {
 			}
 		});
 
-		// Start observing the file explorer
+		
 		this.registerInterval(
 			window.setInterval(() => {
 				const fileExplorer = document.querySelector(
@@ -1551,15 +1550,15 @@ export default class ZenSpacePlugin extends Plugin {
 	}
 
 	async openInZenSpace(folder: TFolder) {
-		// First, create or update the index file if enabled in settings
+		
 		if (this.settings.createIndexFile) {
 			await this.createIndexFile(folder);
 		}
 
-		// Check if we already have a Zen Space view open
+		
 		let leaf = this.app.workspace.getLeavesOfType(ZEN_SPACE_VIEW_TYPE)[0];
 
-		// If not, create a new leaf in the LEFT sidebar
+		
 		if (!leaf) {
 			const leftLeaf = this.app.workspace.getLeftLeaf(false);
 			if (!leftLeaf) {
@@ -1568,27 +1567,27 @@ export default class ZenSpacePlugin extends Plugin {
 			leaf = leftLeaf;
 		}
 
-		// Create a new custom view for this specific folder
+		
 		await leaf.setViewState({
 			type: ZEN_SPACE_VIEW_TYPE,
 			state: { folder: folder.path },
 		});
 
-		// Set the view instance's folder and refresh it
+		
 		const view = leaf.view as ZenSpaceView;
 		if (view) {
 			view.folder = folder;
-			await view.onOpen(); // Refresh the view with the new folder
+			await view.onOpen(); 
 		}
 
-		// Focus the leaf
+		
 		this.app.workspace.revealLeaf(leaf);
 
-		// Update UI to show this is a Zen Space folder
+		
 		this.markFolderAsZenSpace(folder);
 	}
 
-	// Helper to mark a folder as being viewed in Zen Space
+	
 	markFolderAsZenSpace(folder: TFolder) {
 		const folderElements = document.querySelectorAll(
 			`.nav-folder-title[data-path="${folder.path}"]`
@@ -1607,24 +1606,24 @@ export default class ZenSpacePlugin extends Plugin {
 		});
 	}
 
-	// Create or update an Index file with a list of all files in the folder
+	
 	async createIndexFile(folder: TFolder) {
 		const folderName = folder.name;
 		const indexPath = `${folder.path}/Index.md`;
 
-		// Check if Index file already exists
+		
 		const existingFile = this.app.vault.getAbstractFileByPath(indexPath);
 		if (existingFile instanceof TFile) {
-			// File exists, just update it
+			
 			await this.updateIndexFileContent(folder);
 			return;
 		}
 
-		// Format date as YYYY-MM-DD
+		
 		const today = new Date();
 		const formattedDate = today.toISOString().split("T")[0];
 
-		// Get list of markdown files in the folder
+		
 		const files = folder.children
 			.filter(
 				(file) =>
@@ -1635,20 +1634,20 @@ export default class ZenSpacePlugin extends Plugin {
 			.map((file) => file.name.replace(/\.md$/, ""))
 			.sort();
 
-		// Remove duplicates
+		
 		const uniqueFiles = [...new Set(files)];
 
-		// Add a cssclass to enable grid layout
+		
 		const cssClass = this.settings.useGridLayoutForIndex ? "zen-grid" : "";
 
 		let content = "";
 		if (this.settings.useLongformTemplate) {
-			// Format the files list as YAML for the scenes section
+			
 			const scenesYAML = uniqueFiles
 				.map((filename) => `    - ${filename}`)
 				.join("\n");
 
-			// Create content for Index file with longform YAML and files list
+			
 			content = `---
 cssclass: ${cssClass}
 longform:
@@ -1672,7 +1671,7 @@ Files in this folder:
 ${uniqueFiles.map((file) => `- [[${file}]]`).join("\n")}
 `;
 		} else {
-			// Simple Index file without longform properties
+			
 			content = `---
 cssclass: ${cssClass}
 title: ${folderName}
@@ -1688,7 +1687,7 @@ ${uniqueFiles.map((file) => `- [[${file}]]`).join("\n")}
 `;
 		}
 
-		// Create Index file
+		
 		try {
 			await this.app.vault.create(indexPath, content);
 			new Notice(`Created Index file in ${folderName}`);
@@ -1697,7 +1696,7 @@ ${uniqueFiles.map((file) => `- [[${file}]]`).join("\n")}
 		}
 	}
 
-	// Add a method to update the Index file content when files change
+	
 	async updateIndexFileContent(folder: TFolder) {
 		const indexPath = `${folder.path}/Index.md`;
 		const indexFile = this.app.vault.getAbstractFileByPath(indexPath);
@@ -1707,10 +1706,10 @@ ${uniqueFiles.map((file) => `- [[${file}]]`).join("\n")}
 		}
 
 		try {
-			// Read the current content of the Index file
+			
 			let content = await this.app.vault.read(indexFile);
 
-			// Get updated list of markdown files in the folder
+			
 			const files = folder.children
 				.filter(
 					(file) =>
@@ -1721,26 +1720,26 @@ ${uniqueFiles.map((file) => `- [[${file}]]`).join("\n")}
 				.map((file) => file.name.replace(/\.md$/, ""))
 				.sort();
 
-			// Remove duplicates
+			
 			const uniqueFiles = [...new Set(files)];
 
-			// Format today's date for 'updated' field
+			
 			const today = new Date();
 			const formattedDate = today.toISOString().split("T")[0];
 			
-			// Create file list content
+			
 			const filesListContent = `${uniqueFiles.map((file) => `- [[${file}]]`).join("\n")}`;
 
-			// Get the class to use based on settings
+			
 			const cssClass = this.settings.useGridLayoutForIndex ? "zen-grid" : "";
 
-			// Process the frontmatter
+			
 			await this.app.fileManager.processFrontMatter(indexFile, (frontmatter) => {
-				// Update frontmatter properties
+				
 				frontmatter.updated = formattedDate;
 				frontmatter.cssclass = cssClass;
 
-				// Handle longform template if enabled
+				
 				if (this.settings.useLongformTemplate) {
 					if (!frontmatter.longform) {
 						frontmatter.longform = {
@@ -1757,39 +1756,39 @@ ${uniqueFiles.map((file) => `- [[${file}]]`).join("\n")}
 				}
 			});
 
-			// Replace the file list section
+			
 			const fileListRegex = /Files in this folder:[\s\S]*?(?=\n\n#|\n\n---|\n*$)/;
 			const fileListMatch = content.match(fileListRegex);
 
-			// Create the new file list section
+			
 			const fileListSection = `Files in this folder:\n\n${filesListContent}`;
 
-			// Replace or add the file list
+			
 			let newBodyContent = content;
 			if (fileListMatch) {
 				newBodyContent = content.replace(fileListRegex, fileListSection);
 			} else {
-				// If there's no existing file list, add it after the first header
+				
 				const headerMatch = content.match(/^#[^#].*\n/m);
 				if (headerMatch) {
 					const index = content.indexOf(headerMatch[0]) + headerMatch[0].length;
 					newBodyContent = content.substring(0, index) + "\n\n" + fileListSection + content.substring(index);
 				} else {
-					// No header found, just append
+					
 					newBodyContent = content + "\n\n" + fileListSection;
 				}
 			}
 
-			// Write updated content back to the file
+			
 			await this.app.vault.modify(indexFile, newBodyContent);
 		} catch (error) {
 			console.error("Error updating Index file:", error);
 		}
 	}
 
-	// Add this method to register event handlers to update the Index file when files change
+	
 	registerIndexFileUpdateEvents() {
-		// When files are created
+		
 		this.registerEvent(
 			this.app.vault.on("create", (file) => {
 				if (
@@ -1803,7 +1802,7 @@ ${uniqueFiles.map((file) => `- [[${file}]]`).join("\n")}
 			})
 		);
 
-		// When files are deleted
+		
 		this.registerEvent(
 			this.app.vault.on("delete", (file) => {
 				if (
@@ -1817,7 +1816,7 @@ ${uniqueFiles.map((file) => `- [[${file}]]`).join("\n")}
 			})
 		);
 
-		// When files are renamed
+		
 		this.registerEvent(
 			this.app.vault.on("rename", (file, oldPath) => {
 				if (
@@ -1829,7 +1828,7 @@ ${uniqueFiles.map((file) => `- [[${file}]]`).join("\n")}
 					this.updateIndexFileContent(file.parent as TFolder);
 				}
 
-				// Also update the old folder if it was a move operation
+				
 				const oldParentPath = oldPath.substring(
 					0,
 					oldPath.lastIndexOf("/")
@@ -1848,44 +1847,44 @@ ${uniqueFiles.map((file) => `- [[${file}]]`).join("\n")}
 	}
 
 	addZenSpaceButtons() {
-		// Find all folders in the file explorer
+		
 		const folderTitles = document.querySelectorAll(".nav-folder-title");
 
 		folderTitles.forEach((folderTitleEl) => {
-			// Skip if already processed
+			
 			if (folderTitleEl.querySelector(".zen-space-button")) {
 				return;
 			}
 
-			// Get folder path from the data attribute
+			
 			const folderPath = folderTitleEl.getAttribute("data-path");
 			if (!folderPath) {
 				return;
 			}
 
-			// Get folder from path
+			
 			const folder = this.app.vault.getAbstractFileByPath(folderPath);
 			if (!(folder instanceof TFolder)) {
 				return;
 			}
 
-			// Create button element with inline SVG to ensure it renders properly
+			
 			const buttonEl = document.createElement("div");
 			buttonEl.className = "zen-space-button";
 			buttonEl.setAttribute("aria-label", "Open in Zen Space");
 			const icon = buttonEl.createEl('span', { cls: 'zen-space-icon' });
 			setIcon(icon, 'target');
 
-			// Add click handler
+			
 			buttonEl.addEventListener("click", async (event) => {
 				event.stopPropagation();
 				await this.openInZenSpace(folder);
 			});
 
-			// Add to folder title
+			
 			folderTitleEl.appendChild(buttonEl);
 
-			// Check if folder contains an Index file and mark it
+			
 			const folderEl = folderTitleEl.closest(".nav-folder");
 			if (folderEl) {
 				const hasIndexFile = folder.children.some(
@@ -1899,9 +1898,9 @@ ${uniqueFiles.map((file) => `- [[${file}]]`).join("\n")}
 		});
 	}
 
-	// Add commands for hotkeys
+	
 	addCommands() {
-		// Open current folder in Zen Space
+		
 		this.addCommand({
 			id: "open-current-folder",
 			name: "Open current folder",
@@ -1917,7 +1916,7 @@ ${uniqueFiles.map((file) => `- [[${file}]]`).join("\n")}
 			},
 		});
 
-		// Create new file in current Zen Space view
+		
 		this.addCommand({
 			id: "create-new-file",
 			name: "Create new file",
@@ -1933,7 +1932,7 @@ ${uniqueFiles.map((file) => `- [[${file}]]`).join("\n")}
 			},
 		});
 
-		// Create new folder in current Zen Space view
+		
 		this.addCommand({
 			id: "create-new-folder",
 			name: "Create new folder",
@@ -1949,7 +1948,7 @@ ${uniqueFiles.map((file) => `- [[${file}]]`).join("\n")}
 			},
 		});
 
-		// Create new canvas file in current Zen Space view
+		
 		this.addCommand({
 			id: "create-new-canvas",
 			name: "Create new Canvas",
@@ -1965,7 +1964,7 @@ ${uniqueFiles.map((file) => `- [[${file}]]`).join("\n")}
 			},
 		});
 
-		// Toggle pin status of selected file
+		
 		this.addCommand({
 			id: "toggle-pin-status",
 			name: "Toggle pin status",
@@ -1991,12 +1990,12 @@ ${uniqueFiles.map((file) => `- [[${file}]]`).join("\n")}
 	onunload() {
 		console.log("Unloading ZenSpace plugin");
 
-		// Remove all added buttons
+		
 		document
 			.querySelectorAll(".zen-space-button")
 			.forEach((el) => el.remove());
 		
-		// Remove the grid layout classes from body
+		
 		document.body.classList.remove('colorful-zen-grid');
 		document.body.classList.remove('simple-zen-grid');
 	}
@@ -2014,7 +2013,7 @@ class ZenSpaceSettingTab extends PluginSettingTab {
 		const { containerEl } = this;
 		containerEl.empty();
 
-		// File Creation Settings
+		
 		new Setting(containerEl)
 			.setName("Index file")
 			.setHeading();
@@ -2057,7 +2056,7 @@ class ZenSpaceSettingTab extends PluginSettingTab {
 						this.plugin.settings.useGridLayoutForIndex = value;
 						await this.plugin.saveSettings();
 						
-						// Notify user that they'll need to regenerate index files
+						
 						if (value) {
 							new Notice("Grid layout enabled. Reopen folders in Zen Space to update index files.");
 						} else {
@@ -2067,7 +2066,7 @@ class ZenSpaceSettingTab extends PluginSettingTab {
 			);
 			
 
-		// Add simple style option
+		
 		new Setting(containerEl)
 			.setName("Simple grid style")
 			.setDesc("Remove top border colors from grid cards for a cleaner look")
@@ -2080,7 +2079,7 @@ class ZenSpaceSettingTab extends PluginSettingTab {
 					})
 			);
 
-		// Display Settings
+		
 		new Setting(containerEl)
 			.setName("Include subfolders")
 			.setDesc("Show subfolders in the Zen Space view")
