@@ -82,7 +82,7 @@ class ZenSpaceView extends ItemView {
 	}
 
 	getDisplayText(): string {
-		return `Zen Space: ${this.folder.name}`;
+		return `Zen Space ${this.folder.name}`;
 	}
 
 	getIcon(): string {
@@ -866,7 +866,8 @@ class ZenSpaceView extends ItemView {
 	displayFolderContents(
 		folder: TFolder,
 		container: HTMLElement,
-		isRootFolder = false
+		isRootFolder = false,
+		depth = 0
 	) {
 		
 		let filesToDisplay = folder.children.filter((file) => {
@@ -905,7 +906,9 @@ class ZenSpaceView extends ItemView {
 		
 		for (const file of filesToDisplay) {
 			const fileItem = container.createEl("div", {
-				cls: "zen-space-file-item",
+				cls: isRootFolder && !(file instanceof TFolder) ? 
+					"zen-space-file-item zen-space-depth-r" : 
+					`zen-space-file-item zen-space-depth-${depth}`,
 			});
 
 			
@@ -957,7 +960,7 @@ class ZenSpaceView extends ItemView {
 				
 				if (this.expandedFolders.has(file.path)) {
 					if (file instanceof TFolder) {
-						this.displayFolderContents(file, childContainer);
+						this.displayFolderContents(file, childContainer, false, depth + 1);
 					}
 				}
 
@@ -1679,6 +1682,7 @@ export default class ZenSpacePlugin extends Plugin {
 		if (existingFile instanceof TFile) {
 			// If it exists, update its content
 			await this.updateIndexFileContent(folder);
+			new Notice(`Updated Index file in ${folderName}`);
 			return;
 		}
 
@@ -1770,7 +1774,10 @@ ${this.settings.includeSubfolders ? Array.from(subfolders.entries()).map(([path,
 			await this.app.vault.create(indexPath, content);
 			new Notice(`Created Index file in ${folderName}`);
 		} catch (error) {
-			new Notice(`Error creating Index file: ${error}`);
+			// Only show error notice if it's not because the file already exists
+			if (!(error instanceof Error && error.message.includes("already exists"))) {
+				new Notice(`Error creating Index file: ${error}`);
+			}
 		}
 	}
 
