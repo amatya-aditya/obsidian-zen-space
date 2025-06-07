@@ -1,0 +1,14 @@
+views:
+  - type: table
+    name: Database
+    filters:
+      and:
+        - file.folder == "/"
+    order:
+      - file.name
+      - tags
+      - created
+      - updated
+    columnSize:
+      file.name: 352
+      note.tags: 306

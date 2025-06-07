@@ -301,16 +301,21 @@
 }
 
 .zen-space-extension-badge {
-    font-size: 10px;
-    padding: 1px 4px;
-    border-radius: 3px;
-    margin-left: 4px;
+    border-radius: var(--radius-s);
+    font-size: 9px;
+    font-weight: var(--font-semibold);
+    letter-spacing: 0.05em;
+    line-height: var(--line-height-normal);
+    margin-left: auto;
+    padding: 0 var(--size-4-1);
     text-transform: uppercase;
-    font-weight: 600;
-    background-color: var(--background-modifier-border);
-    color: var(--text-muted);
-    vertical-align: middle;
+    align-self: center;
+    color: var(--nav-file-tag-color);
+    background: var(--nav-file-tag-bg);
+    margin-top: 1px;
+    
 }
+
 
 .workspace-tab-header[data-type="zen-space-view"] .workspace-tab-header-inner-icon {
     display: flex;
@@ -697,7 +702,7 @@
 
 
 .zen-space-depth-r {
-    padding-left: 22px !important;
+    padding-left: 28px !important;
 }
 
 .zen-space-depth-0 {
