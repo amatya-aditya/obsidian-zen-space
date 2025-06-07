@@ -1,7 +1,7 @@
 {
 	"id": "zen-space",
 	"name": "Zen Space",
-	"version": "1.2.0",
+	"version": "1.2.1",
 	"minAppVersion": "1.1.0",
 	"description": "A focused file explorer for Obsidian showing only the files in the current folder.",
 	"author": "Aditya Amatya",

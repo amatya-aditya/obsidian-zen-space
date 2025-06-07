@@ -803,7 +803,7 @@ class ZenSpaceView extends ItemView {
 		isRootFolder = false,
 		depth = 0
 	) {
-		let filesToDisplay: TAbstractFile[] = folder.children.filter((file): file is TFile => file instanceof TFile);
+		let filesToDisplay: TAbstractFile[] = folder.children;
 
 		if (filesToDisplay.length === 0 && !isRootFolder) {
 			return;
